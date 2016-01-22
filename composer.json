@@ -12,7 +12,8 @@
     }
   ],
   "require": {
-    "samsonphp/generator": "*"
+    "samsonphp/generator": "*",
+    "container-interop/container-interop": "^1.1"
   },
   "require-dev": {
     "phpunit/phpunit": "4.*"
