@@ -5,7 +5,7 @@
  */
 namespace samsonframework\di;
 
-use Interop\Container\ContainerInterface;
+use samsonframework\di\exception\ContainerException;
 use samsonframework\di\exception\NotFoundException;
 
 /**
@@ -35,7 +35,11 @@ class Container implements ContainerInterface
         if (null === $module) {
             throw new NotFoundException($id);
         } else {
-            return $module;
+            if (!is_object($module)) {
+                throw new ContainerException($id);
+            } else {
+                return $module;
+            }
         }
     }
 
