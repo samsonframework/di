@@ -16,7 +16,8 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
     public function testGet()
     {
         $container = new Container();
-        $container->set('testModule', '\samsonframework\di\tests\TestModuleClass');
+        $container->set('\samsonframework\di\tests\TestModuleClass', 'testModule');
+        $instance = $container->get('\samsonframework\di\tests\TestModuleClass');
     }
 
     public function testHas()

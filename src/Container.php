@@ -21,46 +21,52 @@ class Container implements ContainerInterface
     /** @var array[string] Collection of loaded modules into container stored by classes */
     protected $classes = array();
 
-    public function set($id, $className)
+    /**
+     * @param      $id
+     * @param null $alias
+     */
+    public function set($id, $alias = null)
     {
         // Check if we have not set this identifier/classname and it does exists
-        if (!$this->has($className) && !$this->has($id) && class_exists($className)) {
-            $class = new \ReflectionClass($className);
+        if (!$this->has($id) && !$this->has($alias) && class_exists($id)) {
+            $class = new \ReflectionClass($id);
 
             /** @var array $dependencies Collection of dependent instances */
             $dependencies = array();
 
-            /** @var bool $errors Flag that shows successfull dependencies loading */
+            /** @var bool $errors Flag that shows successful dependencies loading */
             $errors = false;
 
             // Iterate all dependencies
             foreach ($class->getConstructor()->getParameters() as $parameter) {
-                try {
-                    $dependencyClass = $parameter->getClass()->name;
+                if (!$parameter->isOptional()) {
+                    try {
+                        $dependencyClass = $parameter->getClass()->name;
 
-                    // Search for instance
-                    if (!$this->has($dependencyClass)) {
-                        // Go deeper in recursion
-                        $this->set($dependencyClass, $dependencyClass);
+                        // Search for instance
+                        if (!$this->has($dependencyClass)) {
+                            // Go deeper in recursion
+                            $this->set($dependencyClass, $dependencyClass);
+                        }
+
+                        // Store dependent instance
+                        $dependencies[] = $this->get($dependencyClass);
+                    } catch (\Exception $e) {
+                        // Failed loading some dependencies
+                        $errors = true;
                     }
-
-                    // Store dependent instace
-                    $dependencies[] = $this->get($dependencyClass);
-                } catch(\Exception $e) {
-                    // Failed loading some dependencies
-                    $errors = true;
                 }
             }
 
             if (!$errors) {
                 // Create instance with dependencies
-                $reflect = new \ReflectionClass($className);
+                $reflect = new \ReflectionClass($id);
 
                 // Create instance with dependencies
                 $instance = $reflect->newInstanceArgs($dependencies);
 
                 // Store instance in collections
-                $this->classes[strtolower($className)] = &$instance;
+                $this->classes[$alias] = &$instance;
                 $this->modules[$id] = &$instance;
             }
         }
@@ -102,6 +108,6 @@ class Container implements ContainerInterface
      */
     public function has($id)
     {
-        return isset($this->modules[$id]) || isset($this->classes[strtolower($id)]);
+        return isset($this->modules[$id]) || isset($this->classes[$id]);
     }
 }
