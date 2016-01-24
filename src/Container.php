@@ -25,25 +25,6 @@ class Container implements ContainerInterface
     /** @var array[string] Collection of loaded modules into container stored by classes */
     protected $classes = array();
 
-    public function callback($alias, $className)
-    {
-
-    }
-
-    public function service($alias, $className)
-    {
-
-    }
-
-    public function instance($alias, $instance)
-    {
-
-    }
-
-    /**
-     * @param      $id
-     * @param null $alias
-     */
     public function set($id, $alias = null)
     {
         // Check if we have not set this identifier/classname and it does exists

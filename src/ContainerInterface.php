@@ -27,28 +27,31 @@ interface ContainerInterface extends \Interop\Container\ContainerInterface
      *
      * @param string $className Fully qualified class name
      * @param string $alias Dependency name
+     * @param array  $parameters Collection of parameters needed for dependency creation
      *
      * @return self Chaining
      */
-    public function service($className, $alias = null);
+    public function service($className, $alias = null, array $parameters = array());
 
     /**
      * Set service dependency by passing object instance.
      *
      * @param mixed $instance Instance that needs to be return by this dependency
      * @param string $alias Dependency name
+     * @param array  $parameters Collection of parameters needed for dependency creation
      *
      * @return self Chaining
      */
-    public function instance(&$instance, $alias = null);
+    public function instance(&$instance, $alias = null, array $parameters = array());
 
     /**
      * Set dependency.
      *
-     * @param string $className Fully qualified class name
-     * @param string $alias Dependency name
+     * @param string $className  Fully qualified class name
+     * @param string $alias      Dependency name
+     * @param array  $parameters Collection of parameters needed for dependency creation
      *
-     * @return self Chaining
+     * @return ContainerInterface Chaining
      */
-    public function set($className, $alias = null);
+    public function set($className, $alias = null, array $parameters = array());
 }
