@@ -5,9 +5,13 @@
  */
 namespace samsonframework\di;
 
-use Interop\Container\ContainerInterface;
 use samsonframework\di\exception\ContainerException;
 use samsonframework\di\exception\NotFoundException;
+
+//TODO: Configuring and caching
+//TODO: Interface & abstract class resolving
+//TODO: Other parameter types(not hintable) resolving
+//TODO: Lazy creation by default
 
 /**
  * Class Container
@@ -20,6 +24,21 @@ class Container implements ContainerInterface
 
     /** @var array[string] Collection of loaded modules into container stored by classes */
     protected $classes = array();
+
+    public function callback($alias, $className)
+    {
+
+    }
+
+    public function service($alias, $className)
+    {
+
+    }
+
+    public function instance($alias, $instance)
+    {
+
+    }
 
     /**
      * @param      $id
