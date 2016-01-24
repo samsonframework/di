@@ -19,13 +19,13 @@ use samsonframework\di\exception\NotFoundException;
  */
 class Container implements ContainerInterface
 {
-    /** @var array[string] Collection of loaded modules into container */
-    protected $modules = array();
+    /** @var array[string] Collection of loaded services */
+    protected $services = array();
 
-    /** @var array[string] Collection of loaded modules into container stored by classes */
-    protected $classes = array();
+    /** @var array[string] Collection of alias => class name for alias resolving*/
+    protected $aliases = array();
 
-    public function set($id, $alias = null)
+    public function _set($id, $alias = null)
     {
         // Check if we have not set this identifier/classname and it does exists
         if (!$this->has($id) && !$this->has($alias) && class_exists($id)) {
@@ -66,8 +66,8 @@ class Container implements ContainerInterface
                 $instance = $reflect->newInstanceArgs($dependencies);
 
                 // Store instance in collections
-                $this->classes[$alias] = &$instance;
-                $this->modules[$id] = &$instance;
+                $this->aliases[$alias] = &$instance;
+                $this->services[$id] = &$instance;
             }
         }
     }
@@ -85,7 +85,7 @@ class Container implements ContainerInterface
     public function get($id)
     {
         // Set pointer to module
-        $module = &$this->modules[$id];
+        $module = &$this->services[$id];
 
         if (null === $module) {
             throw new NotFoundException($id);
@@ -108,6 +108,62 @@ class Container implements ContainerInterface
      */
     public function has($id)
     {
-        return isset($this->modules[$id]) || isset($this->classes[$id]);
+        return isset($this->services[$id]) || isset($this->aliases[$id]);
+    }
+
+    /**
+     * Set dependency alias with callback function.
+     *
+     * @param callable $callable Callable to return dependency
+     * @param string   $alias    Dependency name
+     *
+     * @return self Chaining
+     */
+    public function callback($callable, $alias = null)
+    {
+        // TODO: Implement callback() method.
+    }
+
+    /**
+     * Set service dependency. Upon first creation of this class instance
+     * it would be used everywhere where this dependency is needed.
+     *
+     * @param string $className  Fully qualified class name
+     * @param string $alias      Dependency name
+     * @param array  $parameters Collection of parameters needed for dependency creation
+     *
+     * @return self Chaining
+     */
+    public function service($className, $alias = null, array $parameters = array())
+    {
+        // TODO: Implement service() method.
+    }
+
+    /**
+     * Set service dependency by passing object instance.
+     *
+     * @param mixed  $instance   Instance that needs to be return by this dependency
+     * @param string $alias      Dependency name
+     * @param array  $parameters Collection of parameters needed for dependency creation
+     *
+     * @return self Chaining
+     */
+    public function instance(&$instance, $alias = null, array $parameters = array())
+    {
+        // TODO: Implement instance() method.
+    }
+
+    /**
+     * Set dependency.
+     *
+     * @param string $className  Fully qualified class name
+     * @param string $alias      Dependency name
+     * @param array  $parameters Collection of parameters needed for dependency creation
+     *
+     * @return ContainerInterface Chaining
+     */
+    public function set($className, $alias = null, array $parameters = array())
+    {
+        // TODO: Implement set() method.
     }
 }
