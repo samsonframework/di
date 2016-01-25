@@ -186,15 +186,13 @@ class Container implements ContainerInterface
             ->defVar('static $services')
         ->newLine();
 
-        $started = false;
+        reset($this->dependencies);
+        $first = key($this->dependencies);
+
         foreach ($this->dependencies as $className => $dependencies) {
             // Generate condition statement to define if this class is needed
-            if (!$started) {
-                $started = true;
-                $this->generator->defIfCondition($inputVariable . ' === \'' . $className . '\'');
-            } else {
-                $this->generator->defElseIfCondition($inputVariable . ' === \'' . $className . '\'');
-            }
+            $conditionFunc = $className === $first ? 'defIfCondition' : 'defElseIfCondition';
+            $this->generator->$conditionFunc($inputVariable . ' === \'' . $className . '\'');
 
             $this->generator->newLine('return ');
 
