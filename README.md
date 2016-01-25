@@ -14,6 +14,7 @@ SamsonFramework dependency injection container implementation
  * ```25/01/2016``` This class DOES NOT(yet) supports setter injections.
  * ```25/01/2016``` This class DOES NOT(yet) supports existing instances.
  * Class supports regular constructor parameters combined with type hinted dependencies.
+ * Class supports callbacks.
  * Class supports service - singleton object instance that needs to be created only once.
  * Class implements PSR-11([container-interop](https://github.com/container-interop/container-interop)).
  
