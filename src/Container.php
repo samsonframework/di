@@ -249,7 +249,8 @@ class Container implements ContainerInterface
      */
     public function has($alias)
     {
-        return array_key_exists($alias, $this->services)
+        return array_key_exists($alias, $this->dependencies)
+        || array_key_exists($alias, $this->services)
         || array_key_exists($alias, $this->aliases);
     }
 
