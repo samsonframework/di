@@ -29,7 +29,7 @@ class Container implements ContainerInterface
     /** @var array[string] Collection of loaded services */
     protected $services = array();
 
-    /** @var array[string] Collection of alias => class name for alias resolving*/
+    /** @var array[string] Collection of alias => class name for alias resolving */
     protected $aliases = array();
 
     /** @var array[string] Collection of class name dependencies trees */
@@ -127,83 +127,87 @@ class Container implements ContainerInterface
      * Recursive object creation with dependencies.
      *
      * @param array  $dependencies Collection of current class dependenices
-     * @param string $class Current class name
+     * @param string $class        Current class name
      *
      * @throws ConstructorParameterNotSetException
      */
 
     public function generateLogicConditions(array $dependencies, $class)
     {
+        // Start entity creation
+        $this->generator->newLine('new ' . $class . '(');
         $this->generator->tabs++;
 
+        // Get last dependency variable name
+        end($dependencies);
+        $last = key($dependencies);
+
         // Iterate all dependencies for this class
-        $variables = array_keys($dependencies);
-        for ($i = 0, $s = count($dependencies); $i < $s; $i++) {
-            $className = $dependencies[$variables[$i]];
+        foreach ($dependencies as $variable => $dependency) {
             // If dependency value is a string
-            if (is_string($className)) {
+            if (is_string($dependency)) {
                 // Define if we have this dependency described in dependency tree
-                $dependencyPointer = &$this->dependencies[$className];
+                $dependencyPointer = &$this->dependencies[$dependency];
                 if (null !== $dependencyPointer) {
-                    $this->generator->newLine('new ' . $className . '(');
-                    $this->generateLogicConditions($dependencyPointer, $className);
-                    $this->generator->newLine(')');
-                } elseif (class_exists($className, false)) {
-                    $this->generator->newLine('new ' . $className . '()');
+                    $this->generateLogicConditions($dependencyPointer, $dependency);
+                } elseif (class_exists($dependency, false)) {
+                    $this->generator->newLine('new ' . $dependency . '()');
                 } else { // String variable
-                    $this->generator->newLine()->stringValue($className);
+                    $this->generator->newLine()->stringValue($dependency);
                 }
-
-                if ($i !== $s - 1) {
-                    $this->generator->text(',');
-                }
-            } elseif (is_array($className)){ // Regular constructor parameter
-                $this->generator->newLine()->arrayValue($className);
-
-                if ($i !== $s - 1) {
-                    $this->generator->text(',');
-                }
-            } elseif ($className === null) { // Parameter is not set
-                throw new ConstructorParameterNotSetException($class.'::'.$variables[$i]);
+            } elseif (is_array($dependency)) { // Regular constructor parameter
+                $this->generator->newLine()->arrayValue($dependency);
+            } elseif ($dependency === null) { // Parameter is not set
+                throw new ConstructorParameterNotSetException($class . '::' . $variable);
             }
 
-
+            // Add comma if this is not last dependency
+            if ($variable !== $last) {
+                $this->generator->text(',');
+            }
         }
         $this->generator->tabs--;
+        $this->generator->newLine(')');
     }
 
+    /**
+     * @param string $functionName
+     *
+     * @return string
+     * @throws ConstructorParameterNotSetException
+     */
     public function generateLogicFunction($functionName = self::LOGIC_FUNCTION_NAME)
     {
         $inputVariable = '$aliasOrClassName';
         $this->generator
             ->defFunction($functionName, array($inputVariable))
             ->defVar('static $services')
-        ;
+        ->newLine();
 
         $started = false;
-        foreach ($this->dependencies as $alias => $dependency) {
-            // Get class name from alias
-            $className = array_key_exists($alias, $this->aliases) ? $this->aliases[$alias] : $alias;
-
+        foreach ($this->dependencies as $className => $dependencies) {
             // Generate condition statement to define if this class is needed
             if (!$started) {
                 $started = true;
-                $this->generator->defIfCondition($inputVariable . ' === \'' . $alias . '\'');
+                $this->generator->defIfCondition($inputVariable . ' === \'' . $className . '\'');
             } else {
-                $this->generator->defElseIfCondition($inputVariable . ' === \'' . $alias . '\'');
+                $this->generator->defElseIfCondition($inputVariable . ' === \'' . $className . '\'');
             }
 
-            $this->generator->newLine('return new '.$className.'(');
+            $this->generator->newLine('return ');
 
-            $this->generateLogicConditions($dependency, $className);
+            // Go to recursive dependencies definition
+            $this->generateLogicConditions($dependencies, $className);
 
-            $this->generator->newLine(');');
+            // Close top level instance creation
+            $this->generator->text(';');
         }
 
         // Add method not found
-        $this->generator->endIfCondition()->newLine('return null;')->endFunction();
-
-        return $this->generator->flush();
+        return $this->generator
+            ->endIfCondition()
+            ->endFunction()
+            ->flush();
     }
 
     /**

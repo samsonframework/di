@@ -2,8 +2,10 @@
 function diContainer($aliasOrClassName)
 {
     static $services;
+    
     if ($aliasOrClassName === '\samsonframework\di\tests\OtherTestClass') {
-        return new \samsonframework\di\tests\OtherTestClass(
+        return 
+        new \samsonframework\di\tests\OtherTestClass(
             new \samsonframework\di\tests\OtherThirdTestClass(
                 new \samsonframework\di\tests\OtherSecondTestClass()
             ),
@@ -16,11 +18,13 @@ function diContainer($aliasOrClassName)
             'I am string2'
         );
     } elseif ($aliasOrClassName === '\samsonframework\di\tests\OtherThirdTestClass') {
-        return new \samsonframework\di\tests\OtherThirdTestClass(
+        return 
+        new \samsonframework\di\tests\OtherThirdTestClass(
             new \samsonframework\di\tests\OtherSecondTestClass()
         );
     } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestModuleClass') {
-        return new \samsonframework\di\tests\TestModuleClass(
+        return 
+        new \samsonframework\di\tests\TestModuleClass(
             new \samsonframework\di\tests\OtherTestClass(
                 new \samsonframework\di\tests\OtherThirdTestClass(
                     new \samsonframework\di\tests\OtherSecondTestClass()
@@ -42,5 +46,4 @@ function diContainer($aliasOrClassName)
             'I am string'
         );
     }
-    return null;
 }
