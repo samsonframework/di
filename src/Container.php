@@ -182,6 +182,11 @@ class Container implements ContainerInterface
         $this->generator->newLine(')');
     }
 
+    /**
+     * Generate callback logic implementation as plain code.
+     *
+     * @param string $className Callback alias
+     */
     protected function generateCallback($className)
     {
         // Get closure reflection
