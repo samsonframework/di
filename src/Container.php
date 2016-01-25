@@ -182,6 +182,35 @@ class Container implements ContainerInterface
         $this->generator->newLine(')');
     }
 
+    protected function generateCallback($className)
+    {
+        // Get closure reflection
+        $reflection = new \ReflectionFunction($this->callbacks[$className]);
+        // Read closure file
+        $lines = file($reflection->getFileName());
+        $opened = 0;
+        // Read only closure lines
+        for ($l = $reflection->getStartLine(); $l < $reflection->getEndLine(); $l++) {
+            // Fix opening braces scope
+            if (strpos($lines[$l], '{') !== false) {
+                $opened++;
+            }
+
+            // Fix closing braces scope
+            if (strpos($lines[$l], '}') !== false) {
+                $opened--;
+            }
+
+            // Break if we reached closure end
+            if ($opened === -1) {
+                break;
+            }
+
+            // Add closure code
+            $this->generator->newLine(trim($lines[$l]));
+        }
+    }
+
     /**
      * @param string $functionName
      *
@@ -206,31 +235,7 @@ class Container implements ContainerInterface
 
             // If this is a callback entity
             if (array_key_exists($className, $this->callbacks)) {
-                // Get closure reflection
-                $reflection = new \ReflectionFunction($this->callbacks[$className]);
-                // Read closure file
-                $lines = file($reflection->getFileName());
-                $opened = 0;
-                // Read only closure lines
-                for($l = $reflection->getStartLine(); $l < $reflection->getEndLine(); $l++) {
-                    // Fix openning braces scope
-                    if (strpos($lines[$l], '{') !== false) {
-                        $opened++;
-                    }
-
-                    // Fix closing braces scope
-                    if (strpos($lines[$l], '}') !== false) {
-                        $opened--;
-                    }
-
-                    // Break if we reached closure end
-                    if ($opened === -1) {
-                        break;
-                    }
-
-                    // Add closure code
-                    $this->generator->newLine(trim($lines[$l]));
-                }
+                $this->generateCallback($className);
             } else { // Regular entity
                 $this->generator->newLine('return ');
 
