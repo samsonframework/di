@@ -14,7 +14,7 @@ use samsonphp\generator\Generator;
 //TODO: Interface & abstract class resolving.
 //TODO: Lazy creation by default, need to use Mocks and magic methods.
 //TODO: existing instances passing to logic function.
-//TODO: Closure handling with logic.
+//TODO: closure and other fully qualified name resolving
 
 /**
  * Dependency injection container.
