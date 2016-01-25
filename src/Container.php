@@ -137,8 +137,14 @@ class Container implements ContainerInterface
 
     public function generateLogicConditions(array &$dependencies, $class)
     {
-        // Start entity creation
-        $this->generator->newLine('new ' . $class . '(');
+        // Start service creation
+        if (array_key_exists($class, $this->services)) {
+            $this->generator->newLine('isset($services[\''.$class.'\'])');
+            $this->generator->newLine('? $services[\''.$class.'\']');
+            $this->generator->newLine(': $services[\''.$class.'\'] = new '.$class.'(');
+        } else { // Regular entity creation
+            $this->generator->newLine('new ' . $class . '(');
+        }
         $this->generator->tabs++;
 
         // Get last dependency variable name
@@ -279,7 +285,7 @@ class Container implements ContainerInterface
      */
     public function service($className, $alias = null, array $parameters = array())
     {
-        $this->services[$alias] = $className;
+        $this->services[$className] = $className;
 
         return $this->set($className, $alias, $parameters);
     }

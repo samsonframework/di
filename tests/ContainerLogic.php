@@ -45,5 +45,38 @@ function diContainer($aliasOrClassName)
             ),
             'I am string'
         );
+    } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestServiceClass') {
+        return 
+        isset($services['\samsonframework\di\tests\TestServiceClass'])
+        ? $services['\samsonframework\di\tests\TestServiceClass']
+        : $services['\samsonframework\di\tests\TestServiceClass'] = new \samsonframework\di\tests\TestServiceClass(
+            new \samsonframework\di\tests\TestModuleClass(
+                new \samsonframework\di\tests\OtherTestClass(
+                    new \samsonframework\di\tests\OtherThirdTestClass(
+                        new \samsonframework\di\tests\OtherSecondTestClass()
+                    ),
+                    array(
+                        '0' => '0',
+                        '1' => '1',
+                        '2' => '2',
+                        '3' => '3',
+                    ),
+                    'I am string2'
+                ),
+                new \samsonframework\di\tests\OtherSecondTestClass(),
+                array(
+                    '0' => '1',
+                    '1' => '2',
+                    '2' => '3',
+                ),
+                'I am string'
+            ),
+            array(
+                '0' => '1',
+                '1' => '2',
+                '2' => '3',
+            ),
+            'I am string'
+        );
     }
 }
