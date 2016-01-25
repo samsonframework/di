@@ -11,10 +11,10 @@ use samsonframework\di\exception\ContainerException;
 use samsonframework\di\exception\NotFoundException;
 use samsonphp\generator\Generator;
 
-//TODO: caching
+
 //TODO: Interface & abstract class resolving
-//TODO: Other parameter types(not hintable) resolving
 //TODO: Lazy creation by default
+//TODO: instance and passing to logic function
 
 /**
  * Class Container
@@ -189,8 +189,8 @@ class Container implements ContainerInterface
      */
     public function get($alias)
     {
-        // Set pointer to module
-        $module = &$this->services[$alias];
+        // Get pointer from logic
+        $module = diContainer($alias);
 
         if (null === $module) {
             throw new NotFoundException($alias);
