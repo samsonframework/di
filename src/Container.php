@@ -8,7 +8,7 @@ namespace samsonframework\di;
 use samsonframework\di\exception\ContainerException;
 use samsonframework\di\exception\NotFoundException;
 
-//TODO: Configuring and caching
+//TODO: caching
 //TODO: Interface & abstract class resolving
 //TODO: Other parameter types(not hintable) resolving
 //TODO: Lazy creation by default
@@ -25,51 +25,53 @@ class Container implements ContainerInterface
     /** @var array[string] Collection of alias => class name for alias resolving*/
     protected $aliases = array();
 
-    public function _set($id, $alias = null)
+    protected function getClassName(\ReflectionParameter $param) {
+        preg_match('/\[\s\<\w+?>\s([\w\\\\]+)/s', $param->__toString(), $matches);
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+
+    /**
+     * Recursively build class constructor dependencies tree.
+     *
+     * @param string $className Current class name for analyzing
+     * @param array  $dependencies Reference to tree for filling up
+     *
+     * @return array[string] Multidimensional array as dependency tree
+     */
+    protected function buildDependenciesTree($className, array &$dependencies = array())
     {
-        // Check if we have not set this identifier/classname and it does exists
-        if (!$this->has($id) && !$this->has($alias) && class_exists($id)) {
-            $class = new \ReflectionClass($id);
+        // We need this class to exists to use reflections
+        if (class_exists($className)) {
+            $class = new \ReflectionClass($className);
+            // We can build dependency tree only from constructor dependencies
+            $constructor = $class->getConstructor();
+            if (null !== $constructor) {
+                // Iterate all dependencies
+                foreach ($constructor->getParameters() as $parameter) {
+                    // Ignore optional parameters
+                    if (!$parameter->isOptional()) {
+                        // Read dependency class name
+                        $dependencyClass = $this->getClassName($parameter);
 
-            /** @var array $dependencies Collection of dependent instances */
-            $dependencies = array();
-
-            /** @var bool $errors Flag that shows successful dependencies loading */
-            $errors = false;
-
-            // Iterate all dependencies
-            foreach ($class->getConstructor()->getParameters() as $parameter) {
-                if (!$parameter->isOptional()) {
-                    try {
-                        $dependencyClass = $parameter->getClass()->name;
-
-                        // Search for instance
-                        if (!$this->has($dependencyClass)) {
-                            // Go deeper in recursion
-                            $this->set($dependencyClass, $dependencyClass);
+                        // If we have found dependency class
+                        if ($dependencyClass !== null) {
+                            // Store new inner dependency branch
+                            $dependencies[$className][$parameter->getName()] = array($dependencyClass => array());
+                            // Go deeper in recursion and pass new branch there
+                            $this->buildDependenciesTree(
+                                $dependencyClass,
+                                $dependencies[$className][$parameter->getName()]
+                            );
                         }
 
-                        // Store dependent instance
-                        $dependencies[] = $this->get($dependencyClass);
-                    } catch (\Exception $e) {
-                        // Failed loading some dependencies
-                        $errors = true;
+                    } else { // Stop iterating as first optional parameter is met
+                        break;
                     }
                 }
             }
-
-            if (!$errors) {
-                // Create instance with dependencies
-                $reflect = new \ReflectionClass($id);
-
-                // Create instance with dependencies
-                $instance = $reflect->newInstanceArgs($dependencies);
-
-                // Store instance in collections
-                $this->aliases[$alias] = &$instance;
-                $this->services[$id] = &$instance;
-            }
         }
+
+        return $dependencies;
     }
 
     /**
@@ -150,6 +152,7 @@ class Container implements ContainerInterface
      */
     public function instance(&$instance, $alias = null, array $parameters = array())
     {
+
         // TODO: Implement instance() method.
     }
 
@@ -164,6 +167,8 @@ class Container implements ContainerInterface
      */
     public function set($className, $alias = null, array $parameters = array())
     {
-        // TODO: Implement set() method.
+        $tree = $this->buildDependenciesTree($className);
+
+        var_dump($tree);
     }
 }
