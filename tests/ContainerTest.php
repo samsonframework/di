@@ -61,13 +61,14 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
 
     public function testService()
     {
-        /** @var \samsonframework\di\tests\TestModuleClass $service */
+        /** @var \samsonframework\di\tests\TestServiceClass $service */
         $service = $this->container->get('\samsonframework\di\tests\TestServiceClass');
-        /** @var \samsonframework\di\tests\TestModuleClass $service2 */
+        /** @var \samsonframework\di\tests\TestServiceClass $service2 */
         $service2 = $this->container->get('\samsonframework\di\tests\TestServiceClass');
 
         $this->assertTrue($service instanceof \samsonframework\di\tests\TestServiceClass);
         $this->assertTrue($service === $service2);
+        $this->assertTrue($service->dependency1 === $service2->dependency1);
     }
 
     public function testHas()
