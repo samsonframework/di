@@ -7,5 +7,10 @@ namespace samsonframework\di\tests;
 
 class OtherThirdTestClass
 {
+    protected $dependency1;
 
+    public function __construct(OtherSecondTestClass $dependency1)
+    {
+        $this->dependency1 = $dependency1;
+    }
 }

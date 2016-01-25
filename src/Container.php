@@ -44,6 +44,7 @@ class Container implements ContainerInterface
 
     /**
      * Recursively build class constructor dependencies tree.
+     * TODO: Analyze recurrent dependencies and throw an error
      *
      * @param string $className    Current class name for analyzing
      * @param array  $dependencies Reference to tree for filling up
