@@ -14,7 +14,9 @@ use samsonphp\generator\Generator;
 
 //TODO: Interface & abstract class resolving
 //TODO: Lazy creation by default
-//TODO: instance and passing to logic function
+//TODO: existing instances passing to logic function
+//TODO: logic services support
+//TODO: has function implementation through logic
 
 /**
  * Class Container
