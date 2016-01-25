@@ -226,7 +226,7 @@ class Container implements ContainerInterface
     public function get($alias)
     {
         // Get pointer from logic
-        $module = diContainer($alias);
+        $module = $this->logic($alias);
 
         if (null === $module) {
             throw new NotFoundException($alias);
