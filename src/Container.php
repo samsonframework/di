@@ -24,6 +24,8 @@ use samsonphp\generator\Generator;
  */
 class Container implements ContainerInterface
 {
+    const LOGIC_FUNCTION_NAME = 'diContainer';
+
     /** @var array[string] Collection of loaded services */
     protected $services = array();
 
@@ -42,8 +44,22 @@ class Container implements ContainerInterface
     }
 
     /**
+     * Internal logic handler. Calls generated logic function
+     * for performing entity creation or search. This is encapsulated
+     * method for further overriding.
+     *
+     * @param string $alias Entity alias
+     *
+     * @return mixed Created instance or null
+     */
+    protected function logic($alias)
+    {
+        return call_user_func(self::LOGIC_FUNCTION_NAME, $alias);
+    }
+
+    /**
      * Get reflection paramater class name type hint if present without
-     * autoloading and throwing exceptions.
+     * auto loading and throwing exceptions.
      *
      * @param \ReflectionParameter $param Parameter for parsing
      *
@@ -107,17 +123,28 @@ class Container implements ContainerInterface
         return $dependencies;
     }
 
+    /**
+     * Recursive object creation with dependencies.
+     *
+     * @param array  $dependencies Collection of current class dependenices
+     * @param string $class Current class name
+     *
+     * @throws ConstructorParameterNotSetException
+     */
+
     public function generateLogicConditions(array $dependencies, $class)
     {
         $this->generator->tabs++;
 
+        // Iterate all dependencies for this class
         $variables = array_keys($dependencies);
         for ($i = 0, $s = count($dependencies); $i < $s; $i++) {
             $className = $dependencies[$variables[$i]];
+            // If dependency value is a string
             if (is_string($className)) {
                 // Define if we have this dependency described in dependency tree
                 $dependencyPointer = &$this->dependencies[$className];
-                if (isset($dependencyPointer)) {
+                if (null !== $dependencyPointer) {
                     $this->generator->newLine('new ' . $className . '(');
                     $this->generateLogicConditions($dependencyPointer, $className);
                     $this->generator->newLine(')');
@@ -145,7 +172,7 @@ class Container implements ContainerInterface
         $this->generator->tabs--;
     }
 
-    public function generateLogicFunction($functionName = 'diContainer')
+    public function generateLogicFunction($functionName = self::LOGIC_FUNCTION_NAME)
     {
         $inputVariable = '$aliasOrClassName';
         $this->generator
