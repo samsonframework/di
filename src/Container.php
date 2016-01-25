@@ -37,9 +37,12 @@ class Container implements ContainerInterface
      *
      * @return string|null Class name typehint or null
      */
-    protected function getClassName(\ReflectionParameter $param) {
-        preg_match('/\[\s\<\w+?>\s([\w\\\\]+)/s', $param->__toString(), $matches);
-        return isset($matches[1]) && $matches[1] !== 'array' ? '\\' . ltrim($matches[1], '\\') : null;
+    protected function getClassName(\ReflectionParameter $param)
+    {
+        preg_match('/\[\s\<\w+?>\s(?<class>[\w\\\\]+)/', (string)$param, $matches);
+        return array_key_exists('class', $matches) && $matches['class'] !== 'array'
+            ? '\\' . ltrim($matches[1], '\\')
+            : null;
     }
 
     /**
@@ -52,7 +55,7 @@ class Container implements ContainerInterface
      * @return array [string] Multidimensional array as dependency tree
      * @throws ClassNotFoundException
      */
-    protected function buildDependenciesTree($className, array &$dependencies = array())
+    protected function buildDependenciesTree($className, array &$dependencies)
     {
         // We need this class to exists to use reflections, it will try to autoload it also
         if (class_exists($className)) {
@@ -90,23 +93,23 @@ class Container implements ContainerInterface
     /**
      * Finds an entry of the container by its identifier and returns it.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @param string $alias Identifier of the entry to look for.
      *
      * @throws NotFoundException  No entry was found for this identifier.
      * @throws ContainerException Error while retrieving the entry.
      *
      * @return mixed Entry.
      */
-    public function get($id)
+    public function get($alias)
     {
         // Set pointer to module
-        $module = &$this->services[$id];
+        $module = &$this->services[$alias];
 
         if (null === $module) {
-            throw new NotFoundException($id);
+            throw new NotFoundException($alias);
         } else {
             if (!is_object($module)) {
-                throw new ContainerException($id);
+                throw new ContainerException($alias);
             } else {
                 return $module;
             }
@@ -117,13 +120,14 @@ class Container implements ContainerInterface
      * Returns true if the container can return an entry for the given identifier.
      * Returns false otherwise.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @param string $alias Identifier of the entry to look for.
      *
      * @return boolean
      */
-    public function has($id)
+    public function has($alias)
     {
-        return isset($this->services[$id]) || isset($this->aliases[$id]);
+        return array_key_exists($alias, $this->services)
+        || array_key_exists($alias, $this->aliases);
     }
 
     /**
