@@ -25,6 +25,9 @@ class Container implements ContainerInterface
     /** @var array[string] Collection of alias => class name for alias resolving*/
     protected $aliases = array();
 
+    /** @var array[string] Collection of class name dependencies trees */
+    protected $dependencies = array();
+
     /**
      * Get reflection paramater class name type hint if present without
      * autoloading and throwing exceptions.
@@ -175,8 +178,15 @@ class Container implements ContainerInterface
      */
     public function set($className, $alias = null, array $parameters = array())
     {
-        $tree = $this->buildDependenciesTree($className);
+        // Add this class dependencies to dependency tree
+        $this->dependencies = array_merge(
+            $this->dependencies,
+            $this->buildDependenciesTree($className, $this->dependencies)
+        );
 
-        var_dump($tree);
+        // Merge other class constructor parameters
+        $this->dependencies[$className] = array_merge($this->dependencies[$className], $parameters);
+
+        var_dump($this->dependencies);
     }
 }
