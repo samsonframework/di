@@ -84,7 +84,7 @@ The packages adheres to the SemVer specification, and there will be full backwar
 
 ##Contributing
 
-Please see CONTRIBUTING for details.
+Feel free to form and create pull requests at any time.
 
 ##Security
 
