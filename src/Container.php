@@ -38,6 +38,11 @@ class Container implements ContainerInterface
     /** @var Generator */
     protected $generator;
 
+    /**
+     * Container constructor.
+     *
+     * @param Generator $generator
+     */
     public function __construct(Generator $generator)
     {
         $this->generator = $generator;
