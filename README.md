@@ -11,7 +11,9 @@ SamsonFramework dependency injection container implementation
 
 ##Main features:
  * The fastest possible dependency injection container implementation.
- * ```25/01/2016``` This class supports only constructor dependency injections
+ * ```25/01/2016``` This class supports only constructor dependency injections.
+ * ```25/01/2016``` This class DOES NOT(yet) supports closures.
+ * ```25/01/2016``` This class DOES NOT(yet) supports existing instances.
  * Class supports regular constructor parameters combined with type hinted dependencies.
  * Class supports service - singleton object instance that needs to be created only once.
  * Class implements PSR-11([container-interop](https://github.com/container-interop/container-interop)).
@@ -89,5 +91,9 @@ Feel free to form and create pull requests at any time.
 ##Security
 
 If you discover any security related issues, please use this repository issue tracker.
+
+##License
+
+Open Software License ("OSL") v 3.0. Please see License File for more information.
 
 [SamsonOS](http://samsonos.com)

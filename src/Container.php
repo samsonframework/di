@@ -17,6 +17,7 @@ use samsonphp\generator\Generator;
 //TODO: existing instances passing to logic function
 //TODO: logic services support
 //TODO: has function implementation through logic
+//TODO: Closure handling with closures
 
 /**
  * Dependency injection container.
