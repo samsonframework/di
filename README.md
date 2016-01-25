@@ -116,6 +116,9 @@ function diContainer($aliasOrClassName)
 ##Closure implementation
 The idea behind closure implementation is that you create all dependencies manually there so we simply parse
 your closure code and just insert it "as it is" into logic function by its alias(see last if branch in example).
+> We do not support parameters as this callback are ment not to have them
+Also we are not supporting ```use``` closure syntax as it should be using context from a file that declares closure.
+
 
 ##Installation
 You can install this package through Composer:
