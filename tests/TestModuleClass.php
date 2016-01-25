@@ -8,7 +8,6 @@ namespace samsonframework\di\tests;
 class TestModuleClass
 {
     public $dependency1;
-
     public $dependency2;
     public $array;
     public $string;

@@ -10,6 +10,8 @@ namespace samsonframework\di\tests;
 use samsonframework\di\Container;
 
 require 'TestModuleClass.php';
+require 'OtherSecondTestClass.php';
+require 'OtherThirdTestClass.php';
 
 class ModuleTest extends \PHPUnit_Framework_TestCase
 {

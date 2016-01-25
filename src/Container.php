@@ -38,7 +38,7 @@ class Container implements ContainerInterface
      */
     protected function getClassName(\ReflectionParameter $param) {
         preg_match('/\[\s\<\w+?>\s([\w\\\\]+)/s', $param->__toString(), $matches);
-        return isset($matches[1]) ? $matches[1] : null;
+        return isset($matches[1]) ? '\\' . ltrim($matches[1], '\\') : null;
     }
 
     /**
