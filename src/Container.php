@@ -19,7 +19,8 @@ use samsonphp\generator\Generator;
 //TODO: has function implementation through logic
 
 /**
- * Class Container
+ * Dependency injection container.
+ *
  * @package samsonframework\di
  */
 class Container implements ContainerInterface
@@ -159,7 +160,7 @@ class Container implements ContainerInterface
                 } else { // String variable
                     $this->generator->newLine()->stringValue($dependency);
                 }
-            } elseif (is_array($dependency)) { // Regular constructor parameter
+            } elseif (is_array($dependency)) { // Dependency value is array
                 $this->generator->newLine()->arrayValue($dependency);
             } elseif ($dependency === null) { // Parameter is not set
                 throw new ConstructorParameterNotSetException($class . '::' . $variable);
