@@ -11,6 +11,7 @@ use samsonframework\di\Container;
 use samsonphp\generator\Generator;
 
 require 'TestModuleClass.php';
+require 'TestServiceClass.php';
 require 'OtherTestClass.php';
 require 'OtherSecondTestClass.php';
 require 'OtherThirdTestClass.php';
@@ -34,6 +35,12 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
             'testModule',
             array('arrayParam' => array(1,2,3), 'stringParam' => 'I am string')
         );
+
+        $this->container->service(
+            '\samsonframework\di\tests\TestServiceClass',
+            'testService',
+            array('arrayParam' => array(1,2,3), 'stringParam' => 'I am string')
+        );
     }
 
     public function testGet()
@@ -50,12 +57,23 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($instance->dependency1 instanceof \samsonframework\di\tests\OtherTestClass);
         $this->assertTrue($instance->dependency2 instanceof \samsonframework\di\tests\OtherSecondTestClass);
         $this->assertTrue($instance->dependency1->dependency1 instanceof \samsonframework\di\tests\OtherThirdTestClass);
+    }
 
+    public function testService()
+    {
+        /** @var \samsonframework\di\tests\TestModuleClass $service */
+        $service = $this->container->get('\samsonframework\di\tests\TestServiceClass');
+        /** @var \samsonframework\di\tests\TestModuleClass $service2 */
+        $service2 = $this->container->get('\samsonframework\di\tests\TestServiceClass');
+
+        $this->assertTrue($service instanceof \samsonframework\di\tests\TestServiceClass);
+        $this->assertTrue($service === $service2);
     }
 
     public function testHas()
     {
         $this->assertTrue($this->container->has('\samsonframework\di\tests\TestModuleClass'));
         $this->assertTrue($this->container->has('testModule'));
+        $this->assertTrue($this->container->has('testService'));
     }
 }
