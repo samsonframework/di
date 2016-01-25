@@ -78,4 +78,16 @@ You can install this package through Composer:
 
 The packages adheres to the SemVer specification, and there will be full backward compatibility between minor versions.
 
+##Testing
+
+```$ vendor/bin/phpunit```
+
+##Contributing
+
+Please see CONTRIBUTING for details.
+
+##Security
+
+If you discover any security related issues, please use this repository issue tracker.
+
 [SamsonOS](http://samsonos.com)
