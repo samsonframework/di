@@ -279,7 +279,9 @@ class Container implements ContainerInterface
      */
     public function service($className, $alias = null, array $parameters = array())
     {
-        // TODO: Implement service() method.
+        $this->services[$alias] = $className;
+
+        return $this->set($className, $alias, $parameters);
     }
 
     /**
@@ -304,7 +306,7 @@ class Container implements ContainerInterface
      * @param string $alias      Dependency name
      * @param array  $parameters Collection of parameters needed for dependency creation
      *
-     * @return ContainerInterface Chaining
+     * @return self Chaining
      */
     public function set($className, $alias = null, array $parameters = array())
     {

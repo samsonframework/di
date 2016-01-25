@@ -17,38 +17,45 @@ require 'OtherThirdTestClass.php';
 
 class ModuleTest extends \PHPUnit_Framework_TestCase
 {
-    public function testGet()
+    /** @var Container */
+    protected $container;
+
+    public function setUp()
     {
-        $container = new Container(new Generator());
-        $container->set(
+        $this->container = new Container(new Generator());
+        $this->container->set(
             '\samsonframework\di\tests\OtherTestClass',
             'otherTestModule',
             array('arrayParam' => array(0,1,2,3), 'stringParam' => 'I am string2')
         );
 
-        $container->set(
+        $this->container->set(
             '\samsonframework\di\tests\TestModuleClass',
             'testModule',
             array('arrayParam' => array(1,2,3), 'stringParam' => 'I am string')
         );
+    }
 
+    public function testGet()
+    {
         // Create logic
-        $logic = $container->generateLogicFunction();
+        $logic = $this->container->generateLogicFunction();
         eval($logic);
         file_put_contents(__DIR__.'/ContainerLogic.php', '<?php '.$logic);
 
         /** @var \samsonframework\di\tests\TestModuleClass $instance */
-        $instance = $container->get('\samsonframework\di\tests\TestModuleClass');
+        $instance = $this->container->get('\samsonframework\di\tests\TestModuleClass');
 
-        $this->assertEquals(true, $instance instanceof \samsonframework\di\tests\TestModuleClass);
-        $this->assertEquals(true, $instance->dependency1 instanceof \samsonframework\di\tests\OtherTestClass);
-        $this->assertEquals(true, $instance->dependency2 instanceof \samsonframework\di\tests\OtherSecondTestClass);
-        $this->assertEquals(true, $instance->dependency1->dependency1 instanceof \samsonframework\di\tests\OtherThirdTestClass);
+        $this->assertTrue($instance instanceof \samsonframework\di\tests\TestModuleClass);
+        $this->assertTrue($instance->dependency1 instanceof \samsonframework\di\tests\OtherTestClass);
+        $this->assertTrue($instance->dependency2 instanceof \samsonframework\di\tests\OtherSecondTestClass);
+        $this->assertTrue($instance->dependency1->dependency1 instanceof \samsonframework\di\tests\OtherThirdTestClass);
 
     }
 
     public function testHas()
     {
-
+        $this->assertTrue($this->container->has('\samsonframework\di\tests\TestModuleClass'));
+        $this->assertTrue($this->container->has('testModule'));
     }
 }
