@@ -19,7 +19,7 @@ interface ContainerInterface extends \Interop\Container\ContainerInterface
      *
      * @return self Chaining
      */
-    //public function callback($callable, $alias = null);
+    public function callback($callable, $alias = null);
 
     /**
      * Set service dependency. Upon first creation of this class instance

@@ -41,6 +41,16 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
             'testService',
             array('arrayParam' => array(1,2,3), 'stringParam' => 'I am string')
         );
+
+        $this->container->callback(function() {
+            return new \samsonframework\di\tests\OtherTestClass(
+                new \samsonframework\di\tests\OtherThirdTestClass(
+                    new \samsonframework\di\tests\OtherSecondTestClass()
+                ),
+                array('1'),
+                '1'
+            );
+        }, 'callbackTest');
     }
 
     public function testGet()
@@ -76,5 +86,10 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->container->has('\samsonframework\di\tests\TestModuleClass'));
         $this->assertTrue($this->container->has('testModule'));
         $this->assertTrue($this->container->has('testService'));
+    }
+
+    public function testClosure()
+    {
+        $this->assertTrue($this->container->get('callbackTest') instanceof \samsonframework\di\tests\OtherTestClass);
     }
 }

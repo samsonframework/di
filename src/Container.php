@@ -11,7 +11,6 @@ use samsonframework\di\exception\ContainerException;
 use samsonframework\di\exception\NotFoundException;
 use samsonphp\generator\Generator;
 
-
 //TODO: Interface & abstract class resolving.
 //TODO: Lazy creation by default, need to use Mocks and magic methods.
 //TODO: existing instances passing to logic function.
@@ -26,11 +25,14 @@ class Container implements ContainerInterface
 {
     const LOGIC_FUNCTION_NAME = 'diContainer';
 
-    /** @var array[string] Collection of loaded services */
-    protected $services = array();
-
     /** @var array[string] Collection of alias => class name for alias resolving */
     protected $aliases = array();
+
+    /** @var array[string] Collection of alias => closure for alias resolving */
+    protected $callbacks = array();
+
+    /** @var array[string] Collection of loaded services */
+    protected $services = array();
 
     /** @var array[string] Collection of class name dependencies trees */
     protected $dependencies = array();
@@ -202,13 +204,42 @@ class Container implements ContainerInterface
             $conditionFunc = $className === $first ? 'defIfCondition' : 'defElseIfCondition';
             $this->generator->$conditionFunc($inputVariable . ' === \'' . $className . '\'');
 
-            $this->generator->newLine('return ');
+            // If this is a callback entity
+            if (array_key_exists($className, $this->callbacks)) {
+                // Get closure reflection
+                $reflection = new \ReflectionFunction($this->callbacks[$className]);
+                // Read closure file
+                $lines = file($reflection->getFileName());
+                $opened = 0;
+                // Read only closure lines
+                for($l = $reflection->getStartLine(); $l < $reflection->getEndLine(); $l++) {
+                    // Fix openning braces scope
+                    if (strpos($lines[$l], '{') !== false) {
+                        $opened++;
+                    }
 
-            // Go to recursive dependencies definition
-            $this->generateLogicConditions($dependencies, $className);
+                    // Fix closing braces scope
+                    if (strpos($lines[$l], '}') !== false) {
+                        $opened--;
+                    }
 
-            // Close top level instance creation
-            $this->generator->text(';');
+                    // Break if we reached closure end
+                    if ($opened === -1) {
+                        break;
+                    }
+
+                    // Add closure code
+                    $this->generator->newLine(trim($lines[$l]));
+                }
+            } else { // Regular entity
+                $this->generator->newLine('return ');
+
+                // Go to recursive dependencies definition
+                $this->generateLogicConditions($dependencies, $className);
+
+                // Close top level instance creation
+                $this->generator->text(';');
+            }
         }
 
         // Add method not found
@@ -269,7 +300,14 @@ class Container implements ContainerInterface
      */
     public function callback($callable, $alias = null)
     {
-        // TODO: Implement callback() method.
+        // Add unique closure alias
+        $this->aliases[$alias] = 'closure'.uniqid(0, 99999);
+
+        // Store callback
+        $this->callbacks[$alias] = $callable;
+
+        // Store dependency
+        $this->dependencies[$alias] = $callable;
     }
 
     /**

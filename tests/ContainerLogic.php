@@ -78,5 +78,13 @@ function diContainer($aliasOrClassName)
             ),
             'I am string'
         );
+    } elseif ($aliasOrClassName === 'callbackTest') {
+        return new \samsonframework\di\tests\OtherTestClass(
+        new \samsonframework\di\tests\OtherThirdTestClass(
+        new \samsonframework\di\tests\OtherSecondTestClass()
+        ),
+        array('1'),
+        '1'
+        );
     }
 }
