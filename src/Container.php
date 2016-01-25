@@ -5,6 +5,7 @@
  */
 namespace samsonframework\di;
 
+use samsonframework\di\exception\ClassNotFoundException;
 use samsonframework\di\exception\ContainerException;
 use samsonframework\di\exception\NotFoundException;
 
@@ -38,20 +39,21 @@ class Container implements ContainerInterface
      */
     protected function getClassName(\ReflectionParameter $param) {
         preg_match('/\[\s\<\w+?>\s([\w\\\\]+)/s', $param->__toString(), $matches);
-        return isset($matches[1]) ? '\\' . ltrim($matches[1], '\\') : null;
+        return isset($matches[1]) && $matches[1] !== 'array' ? '\\' . ltrim($matches[1], '\\') : null;
     }
 
     /**
      * Recursively build class constructor dependencies tree.
      *
-     * @param string $className Current class name for analyzing
+     * @param string $className    Current class name for analyzing
      * @param array  $dependencies Reference to tree for filling up
      *
-     * @return array[string] Multidimensional array as dependency tree
+     * @return array [string] Multidimensional array as dependency tree
+     * @throws ClassNotFoundException
      */
     protected function buildDependenciesTree($className, array &$dependencies = array())
     {
-        // We need this class to exists to use reflections
+        // We need this class to exists to use reflections, it will try to autoload it also
         if (class_exists($className)) {
             $class = new \ReflectionClass($className);
             // We can build dependency tree only from constructor dependencies
@@ -66,13 +68,10 @@ class Container implements ContainerInterface
 
                         // If we have found dependency class
                         if ($dependencyClass !== null) {
-                            // Store new inner dependency branch
-                            $dependencies[$className][$parameter->getName()] = array($dependencyClass => array());
+                            // Point dependency class name
+                            $dependencies[$className][$parameter->getName()] = $dependencyClass;
                             // Go deeper in recursion and pass new branch there
-                            $this->buildDependenciesTree(
-                                $dependencyClass,
-                                $dependencies[$className][$parameter->getName()]
-                            );
+                            $this->buildDependenciesTree($dependencyClass, $dependencies);
                         }
 
                     } else { // Stop iterating as first optional parameter is met
@@ -80,6 +79,8 @@ class Container implements ContainerInterface
                     }
                 }
             }
+        } else { // Something went wrong and class is not auto loaded and missing
+            throw new ClassNotFoundException($className);
         }
 
         return $dependencies;

@@ -10,6 +10,7 @@ namespace samsonframework\di\tests;
 use samsonframework\di\Container;
 
 require 'TestModuleClass.php';
+require 'OtherTestClass.php';
 require 'OtherSecondTestClass.php';
 require 'OtherThirdTestClass.php';
 
