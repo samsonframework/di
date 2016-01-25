@@ -11,8 +11,7 @@ SamsonFramework dependency injection container implementation
 
 ##Main features:
  * The fastest possible dependency injection container implementation.
- * ```25/01/2016``` This class supports only constructor dependency injections.
- * ```25/01/2016``` This class DOES NOT(yet) supports closures.
+ * ```25/01/2016``` This class DOES NOT(yet) supports setter injections.
  * ```25/01/2016``` This class DOES NOT(yet) supports existing instances.
  * Class supports regular constructor parameters combined with type hinted dependencies.
  * Class supports service - singleton object instance that needs to be created only once.
@@ -69,9 +68,54 @@ function diContainer($aliasOrClassName)
             ),
             'I am string'
         );
+    } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestServiceClass') {
+        return 
+        isset($services['\samsonframework\di\tests\TestServiceClass'])
+        ? $services['\samsonframework\di\tests\TestServiceClass']
+        : $services['\samsonframework\di\tests\TestServiceClass'] = new \samsonframework\di\tests\TestServiceClass(
+            new \samsonframework\di\tests\TestModuleClass(
+                new \samsonframework\di\tests\OtherTestClass(
+                    new \samsonframework\di\tests\OtherThirdTestClass(
+                        new \samsonframework\di\tests\OtherSecondTestClass()
+                    ),
+                    array(
+                        '0' => '0',
+                        '1' => '1',
+                        '2' => '2',
+                        '3' => '3',
+                    ),
+                    'I am string2'
+                ),
+                new \samsonframework\di\tests\OtherSecondTestClass(),
+                array(
+                    '0' => '1',
+                    '1' => '2',
+                    '2' => '3',
+                ),
+                'I am string'
+            ),
+            array(
+                '0' => '1',
+                '1' => '2',
+                '2' => '3',
+            ),
+            'I am string'
+        );
+    } elseif ($aliasOrClassName === 'callbackTest') {
+        return new \samsonframework\di\tests\OtherTestClass(
+        new \samsonframework\di\tests\OtherThirdTestClass(
+        new \samsonframework\di\tests\OtherSecondTestClass()
+        ),
+        array('1'),
+        '1'
+        );
     }
 }
 ```
+
+##Closure implementation
+The idea behind closure implementation is that you create all dependencies manually there so we simply parse
+your closure code and just insert it "as it is" into logic function by its alias(see last if branch in example).
 
 ##Installation
 You can install this package through Composer:
