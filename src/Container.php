@@ -151,8 +151,10 @@ class Container implements ContainerInterface
                 // Define if we have this dependency described in dependency tree
                 $dependencyPointer = &$this->dependencies[$dependency];
                 if (null !== $dependencyPointer) {
+                    // We have dependencies tree for this entity
                     $this->generateLogicConditions($dependencyPointer, $dependency);
                 } elseif (class_exists($dependency, false)) {
+                    // There are no dependencies for this entity
                     $this->generator->newLine('new ' . $dependency . '()');
                 } else { // String variable
                     $this->generator->newLine()->stringValue($dependency);
