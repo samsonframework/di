@@ -12,12 +12,10 @@ use samsonframework\di\exception\NotFoundException;
 use samsonphp\generator\Generator;
 
 
-//TODO: Interface & abstract class resolving
-//TODO: Lazy creation by default
-//TODO: existing instances passing to logic function
-//TODO: logic services support
-//TODO: has function implementation through logic
-//TODO: Closure handling with closures
+//TODO: Interface & abstract class resolving.
+//TODO: Lazy creation by default, need to use Mocks and magic methods.
+//TODO: existing instances passing to logic function.
+//TODO: Closure handling with logic.
 
 /**
  * Dependency injection container.
