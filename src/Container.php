@@ -47,7 +47,7 @@ class Container implements ContainerInterface
 
     /**
      * Recursively build class constructor dependencies tree.
-     * TODO: Analyze recurrent dependencies and throw an error
+     * TODO: Analyze recurrent dependencies and throw an exception
      *
      * @param string $className    Current class name for analyzing
      * @param array  $dependencies Reference to tree for filling up
@@ -76,6 +76,8 @@ class Container implements ContainerInterface
                             $dependencies[$className][$parameter->getName()] = $dependencyClass;
                             // Go deeper in recursion and pass new branch there
                             $this->buildDependenciesTree($dependencyClass, $dependencies);
+                        } else { // Set null parameter value
+                            $dependencies[$className][$parameter->getName()] = null;
                         }
 
                     } else { // Stop iterating as first optional parameter is met

@@ -18,6 +18,7 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
 {
     public function testGet()
     {
+        require 'ContainerLogic.php';
         $container = new Container();
         $container->set('\samsonframework\di\tests\TestModuleClass', 'testModule');
         //$instance = $container->get('\samsonframework\di\tests\TestModuleClass');
