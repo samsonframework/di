@@ -25,6 +25,14 @@ class Container implements ContainerInterface
     /** @var array[string] Collection of alias => class name for alias resolving*/
     protected $aliases = array();
 
+    /**
+     * Get reflection paramater class name type hint if present without
+     * autoloading and throwing exceptions.
+     *
+     * @param \ReflectionParameter $param Parameter for parsing
+     *
+     * @return string|null Class name typehint or null
+     */
     protected function getClassName(\ReflectionParameter $param) {
         preg_match('/\[\s\<\w+?>\s([\w\\\\]+)/s', $param->__toString(), $matches);
         return isset($matches[1]) ? $matches[1] : null;
