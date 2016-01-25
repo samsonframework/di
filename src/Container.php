@@ -8,6 +8,7 @@ namespace samsonframework\di;
 use samsonframework\di\exception\ClassNotFoundException;
 use samsonframework\di\exception\ContainerException;
 use samsonframework\di\exception\NotFoundException;
+use samsonphp\generator\Generator;
 
 //TODO: caching
 //TODO: Interface & abstract class resolving
@@ -28,6 +29,14 @@ class Container implements ContainerInterface
 
     /** @var array[string] Collection of class name dependencies trees */
     protected $dependencies = array();
+
+    /** @var Generator */
+    protected $generator;
+
+    public function __construct(Generator $generator)
+    {
+        $this->generator = $generator;
+    }
 
     /**
      * Get reflection paramater class name type hint if present without
@@ -90,6 +99,11 @@ class Container implements ContainerInterface
         }
 
         return $dependencies;
+    }
+
+    public function generateLogicFunction()
+    {
+
     }
 
     /**
