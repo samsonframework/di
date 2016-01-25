@@ -1,24 +1,46 @@
-<?php
-/**
- * Created by Vitaly Iegorov <egorov@samsonos.com>.
- * on 25.01.16 at 08:47
- */
-function di($aliasOrClassName)
+<?php 
+function diContainer($aliasOrClassName)
 {
     static $services;
-
-    if ($aliasOrClassName === 'TestModuleClass') {
+    if ($aliasOrClassName === '\samsonframework\di\tests\OtherTestClass') {
+        return new \samsonframework\di\tests\OtherTestClass(
+            new \samsonframework\di\tests\OtherThirdTestClass(
+                new \samsonframework\di\tests\OtherSecondTestClass()
+            ),
+            array(
+                '0' => '0',
+                '1' => '1',
+                '2' => '2',
+                '3' => '3',
+            ),
+            'I am string2'
+        );
+    } elseif ($aliasOrClassName === '\samsonframework\di\tests\OtherThirdTestClass') {
+        return new \samsonframework\di\tests\OtherThirdTestClass(
+            new \samsonframework\di\tests\OtherSecondTestClass()
+        );
+    } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestModuleClass') {
         return new \samsonframework\di\tests\TestModuleClass(
             new \samsonframework\di\tests\OtherTestClass(
-                isset($services['\samsonframework\di\tests\OtherThirdTestClass'])
-                    ? $services['\samsonframework\di\tests\OtherThirdTestClass']
-                    : $services['\samsonframework\di\tests\OtherThirdTestClass'] = new \samsonframework\di\tests\OtherThirdTestClass(),
-                array(),
-                'sdfsdf'
+                new \samsonframework\di\tests\OtherThirdTestClass(
+                    new \samsonframework\di\tests\OtherSecondTestClass()
+                ),
+                array(
+                    '0' => '0',
+                    '1' => '1',
+                    '2' => '2',
+                    '3' => '3',
+                ),
+                'I am string2'
             ),
             new \samsonframework\di\tests\OtherSecondTestClass(),
-            array(),
-            'sdfds'
+            array(
+                '0' => '1',
+                '1' => '2',
+                '2' => '3',
+            ),
+            'I am string'
         );
     }
+    return null;
 }

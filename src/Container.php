@@ -6,6 +6,7 @@
 namespace samsonframework\di;
 
 use samsonframework\di\exception\ClassNotFoundException;
+use samsonframework\di\exception\ConstructorParameterNotSetException;
 use samsonframework\di\exception\ContainerException;
 use samsonframework\di\exception\NotFoundException;
 use samsonphp\generator\Generator;
@@ -79,14 +80,17 @@ class Container implements ContainerInterface
                         // Read dependency class name
                         $dependencyClass = $this->getClassName($parameter);
 
+                        // Set pointer to parameter as it can be set before
+                        $parameterPointer = &$dependencies[$className][$parameter->getName()];
+
                         // If we have found dependency class
                         if ($dependencyClass !== null) {
                             // Point dependency class name
-                            $dependencies[$className][$parameter->getName()] = $dependencyClass;
+                            $parameterPointer = $dependencyClass;
                             // Go deeper in recursion and pass new branch there
                             $this->buildDependenciesTree($dependencyClass, $dependencies);
-                        } else { // Set null parameter value
-                            $dependencies[$className][$parameter->getName()] = null;
+                        } elseif (!isset($parameterPointer)) { // Set null parameter value
+                            $parameterPointer = null;
                         }
 
                     } else { // Stop iterating as first optional parameter is met
@@ -101,9 +105,76 @@ class Container implements ContainerInterface
         return $dependencies;
     }
 
-    public function generateLogicFunction()
+    public function generateLogicConditions(array $dependencies, $class)
     {
+        $this->generator->tabs++;
 
+        $variables = array_keys($dependencies);
+        for ($i = 0, $s = count($dependencies); $i < $s; $i++) {
+            $className = $dependencies[$variables[$i]];
+            if (is_string($className)) {
+                // Define if we have this dependency described in dependency tree
+                $dependencyPointer = &$this->dependencies[$className];
+                if (isset($dependencyPointer)) {
+                    $this->generator->newLine('new ' . $className . '(');
+                    $this->generateLogicConditions($dependencyPointer, $className);
+                    $this->generator->newLine(')');
+                } elseif (class_exists($className, false)) {
+                    $this->generator->newLine('new ' . $className . '()');
+                } else { // String variable
+                    $this->generator->newLine()->stringValue($className);
+                }
+
+                if ($i !== $s - 1) {
+                    $this->generator->text(',');
+                }
+            } elseif (is_array($className)){ // Regular constructor parameter
+                $this->generator->newLine()->arrayValue($className);
+
+                if ($i !== $s - 1) {
+                    $this->generator->text(',');
+                }
+            } elseif ($className === null) { // Parameter is not set
+                throw new ConstructorParameterNotSetException($class.'::'.$variables[$i]);
+            }
+
+
+        }
+        $this->generator->tabs--;
+    }
+
+    public function generateLogicFunction($functionName = 'diContainer')
+    {
+        $inputVariable = '$aliasOrClassName';
+        $this->generator
+            ->defFunction($functionName, array($inputVariable))
+            ->defVar('static $services')
+        ;
+
+        $started = false;
+        foreach ($this->dependencies as $alias => $dependency) {
+            // Get class name from alias
+            $className = array_key_exists($alias, $this->aliases) ? $this->aliases[$alias] : $alias;
+
+            // Generate condition statement to define if this class is needed
+            if (!$started) {
+                $started = true;
+                $this->generator->defIfCondition($inputVariable . ' === \'' . $alias . '\'');
+            } else {
+                $this->generator->defElseIfCondition($inputVariable . ' === \'' . $alias . '\'');
+            }
+
+            $this->generator->newLine('return new '.$className.'(');
+
+            $this->generateLogicConditions($dependency, $className);
+
+            $this->generator->newLine(');');
+        }
+
+        // Add method not found
+        $this->generator->endIfCondition()->newLine('return null;')->endFunction();
+
+        return $this->generator->flush();
     }
 
     /**
@@ -211,7 +282,5 @@ class Container implements ContainerInterface
 
         // Store alias for this class name
         $this->aliases[$alias] = $className;
-
-        var_dump($this->dependencies);
     }
 }
