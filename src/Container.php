@@ -107,10 +107,7 @@ class Container implements ContainerInterface
                             $parameterPointer = $dependencyClass;
                             // Go deeper in recursion and pass new branch there
                             $this->buildDependenciesTree($dependencyClass, $dependencies);
-                        } elseif (!isset($parameterPointer)) { // Set null parameter value
-                            $parameterPointer = null;
                         }
-
                     } else { // Stop iterating as first optional parameter is met
                         break;
                     }
@@ -132,7 +129,7 @@ class Container implements ContainerInterface
      * @throws ConstructorParameterNotSetException
      */
 
-    public function generateLogicConditions(array $dependencies, $class)
+    public function generateLogicConditions(array &$dependencies, $class)
     {
         // Start entity creation
         $this->generator->newLine('new ' . $class . '(');
