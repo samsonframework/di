@@ -52,7 +52,7 @@ abstract class AbstractContainer implements ContainerInterface
      * Help container resolving interfaces and abstract classes or any entities to
      * different one.
      *
-     * @param string $source Source entity name
+     * @param string $source      Source entity name
      * @param string $destination Destination entity name
      *
      * @return self Chaining
@@ -140,7 +140,7 @@ abstract class AbstractContainer implements ContainerInterface
     public function has($alias)
     {
         $found = array_key_exists($alias, $this->dependencies)
-            || array_key_exists($alias, $this->aliases);
+            || in_array($alias, $this->aliases);
 
         if (!$found) {
             foreach ($this->delegates as $delegate) {
@@ -157,7 +157,7 @@ abstract class AbstractContainer implements ContainerInterface
      * Generate logic conditions and their implementation for container and its delegates.
      *
      * @param string     $inputVariable Input condition parameter variable name
-     * @param bool|false $started Flag if condition branching has been started
+     * @param bool|false $started       Flag if condition branching has been started
      */
     public function generateConditions($inputVariable = '$alias', $started = false)
     {
@@ -166,8 +166,14 @@ abstract class AbstractContainer implements ContainerInterface
             // Generate condition statement to define if this class is needed
             $conditionFunc = !$started ? 'defIfCondition' : 'defElseIfCondition';
 
+            // Create condition branch
+            $condition = $inputVariable . ' === \'' . $alias . '\'';
+            // If we have an alias for this - add it to condition
+            $condition .= array_key_exists($alias, $this->aliases)
+                ? ' || Added' . $inputVariable . ' === \'' . $this->aliases[$alias] . '\''
+                : '';
             // Output condition branch
-            $this->generator->$conditionFunc($inputVariable . ' === \'' . $alias . '\'');
+            $this->generator->$conditionFunc($condition);
 
             // Generate condition for each dependency
             $this->generateCondition($alias, $entity);
@@ -199,6 +205,7 @@ abstract class AbstractContainer implements ContainerInterface
         $this->generator
             ->defFunction($functionName, array($inputVariable))
             ->defVar('static $services')
+            ->defVar($inputVariable)
             ->newLine();
 
         // Generate all container and delegate conditions
@@ -214,9 +221,9 @@ abstract class AbstractContainer implements ContainerInterface
     /**
      * Set container dependency.
      *
-     * @param mixed         $entity Entity
-     * @param string|null   $alias  Entity alias for simplier finding
-     * @param array         $parameters Collection of additional parameters
+     * @param mixed       $entity     Entity
+     * @param string|null $alias      Entity alias for simplier finding
+     * @param array       $parameters Collection of additional parameters
      *
      * @return self Chaining
      */
@@ -224,8 +231,9 @@ abstract class AbstractContainer implements ContainerInterface
 
     /**
      * Generate container dependency condition code.
-     * @param string    $alias Entity alias
-     * @param mixed     $entity Entity
+     *
+     * @param string $alias  Entity alias
+     * @param mixed  $entity Entity
      */
     abstract protected function generateCondition($alias, &$entity);
 }

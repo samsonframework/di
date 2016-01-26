@@ -118,7 +118,7 @@ class Container extends AbstractContainer
         $this->dependencies[$className] = array_merge($this->dependencies[$className], $parameters);
 
         // Store alias for this class name
-        $this->aliases[$alias] = $className;
+        $this->aliases[$className] = $alias;
     }
 
     /**
