@@ -76,6 +76,15 @@ abstract class AbstractContainer implements ContainerInterface
         $module = $this->logic($alias);
 
         if (null === $module) {
+            // Try delegate lookup
+            foreach ($this->delegates as $delegate) {
+                try {
+                    $module = $delegate->get($alias);
+                } catch (\Exception $e) {
+                    // Catch all delegated exceptions
+                }
+            }
+
             throw new NotFoundException($alias);
         } else {
             if (!is_object($module)) {
@@ -111,4 +120,15 @@ abstract class AbstractContainer implements ContainerInterface
         return array_key_exists($alias, $this->dependencies)
         || array_key_exists($alias, $this->aliases);
     }
+
+    /**
+     * Set container dependency.
+     *
+     * @param mixed         $entity Entity
+     * @param string|null   $alias  Entity alias for simplier finding
+     * @param array         $parameters Collection of additional parameters
+     *
+     * @return self Chaining
+     */
+    abstract public function set($entity, $alias = null, array $parameters = array());
 }

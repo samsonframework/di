@@ -55,15 +55,7 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
         }, 'callbackTest');
 
         $serviceContainer = new ClosureContainer(new Generator());
-        $serviceContainer->callback(function() {
-            return new \samsonframework\di\tests\OtherTestClass(
-                new \samsonframework\di\tests\OtherThirdTestClass(
-                    new \samsonframework\di\tests\OtherSecondTestClass()
-                ),
-                array('1'),
-                '1'
-            );
-        }, 'callbackTest');
+
 
         $this->container->delegate($serviceContainer);
     }

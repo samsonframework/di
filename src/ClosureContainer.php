@@ -9,7 +9,7 @@ namespace samsonframework\di;
  * Class ClosureContainer
  * @package samsonframework\di
  */
-class ClosureContainer extends Container
+class ClosureContainer extends AbstractContainer
 {
 
 }
