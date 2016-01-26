@@ -14,8 +14,9 @@ use samsonphp\generator\Generator;
 //TODO: Interface & abstract class resolving.
 //TODO: Lazy creation by default, need to use Mocks and magic methods.
 //TODO: existing instances passing to logic function.
-//TODO: closure and other fully qualified name resolving
-//TODO: Separate generator to a new class
+//TODO: closure and other fully qualified name resolving, probably using tokenizer.
+//TODO: Separate generator to a new class.
+//TODO: Separate instance, service, class, closure containers using delegate interface.
 
 /**
  * Dependency injection container.
