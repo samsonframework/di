@@ -26,7 +26,14 @@ will get all declared classes, find ones created by user and call ```set()``` fo
 
 >I really do not think that you need to auto-wire all existing classes.
  
-###Why we are the fastest
+##Why we are the fastest
+### Concept = Programmable logic
+All our packages have same goal in mind - [Programmable logic](https://en.wikipedia.org/wiki/Programmable_logic_device).
+We are trying to create system that can be easily configurable and usable and them using best practises, knowing all internal
+logic and structure of a package, generate maximum possible performant PHP code to repeat same logic. This generated
+code is ment to be used only in production environment and guarantees 100% logic and functionality compatibility with source code.
+
+### Simple language
 This implementation is lacking all other needed and awesome features like injectors and configurations(for now), but
 this is fastest possible dependency injection implementation. The core of its performance is generated PHP code. We perform
 static analysis of defined entities and their dependencies and generate PHP code logic function. Here is an example:
