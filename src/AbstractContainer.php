@@ -8,6 +8,7 @@ namespace samsonframework\di;
 use Interop\Container\ContainerInterface;
 use samsonframework\di\exception\ContainerException;
 use samsonframework\di\exception\NotFoundException;
+use samsonphp\generator\Generator;
 
 /**
  * Abstract dependency injection container.
@@ -36,6 +37,16 @@ abstract class AbstractContainer implements ContainerInterface
 
     /** @var \samsonphp\generator\Generator */
     protected $generator;
+
+    /**
+     * Container constructor.
+     *
+     * @param Generator $generator
+     */
+    public function __construct(Generator $generator)
+    {
+        $this->generator = $generator;
+    }
 
     /**
      * Help container resolving interfaces and abstract classes or any entities to
@@ -143,6 +154,62 @@ abstract class AbstractContainer implements ContainerInterface
     }
 
     /**
+     * Generate logic conditions and their implementation for container and its delegates.
+     *
+     * @param string     $inputVariable Input condition parameter variable name
+     * @param bool|false $started Flag if condition branching has been started
+     */
+    public function generateConditions($inputVariable = '$alias', $started = false)
+    {
+        // Iterate all container dependencies
+        foreach ($this->dependencies as $alias => $entity) {
+            // Generate condition statement to define if this class is needed
+            $conditionFunc = !$started ? 'defIfCondition' : 'defElseIfCondition';
+
+            // Output condition branch
+            $this->generator->$conditionFunc($inputVariable . ' === \'' . $alias . '\'');
+
+            // Generate condition for each dependency
+            $this->generateCondition($alias, $entity);
+
+            // Set flag that condition is started
+            $started = true;
+        }
+
+        /** @var self $delegate Iterate delegated container to get their conditions */
+        foreach ($this->delegates as $delegate) {
+            // Set current generator
+            $delegate->generator = $this->generator;
+            $delegate->generateConditions($inputVariable, $started);
+        }
+    }
+
+    /**
+     * Generate dependency injection logic function.
+     *
+     * @param string $functionName
+     *
+     * @return string PHP logic function code
+     */
+    public function generateFunction($functionName = self::LOGIC_FUNCTION_NAME)
+    {
+        $inputVariable = '$aliasOrClassName';
+        $this->generator
+            ->defFunction($functionName, array($inputVariable))
+            ->defVar('static $services')
+            ->newLine();
+
+        // Generate all container and delegate conditions
+        $this->generateConditions($inputVariable, false);
+
+        // Add method not found
+        return $this->generator
+            ->endIfCondition()
+            ->endFunction()
+            ->flush();
+    }
+
+    /**
      * Set container dependency.
      *
      * @param mixed         $entity Entity
@@ -153,16 +220,10 @@ abstract class AbstractContainer implements ContainerInterface
      */
     abstract public function set($entity, $alias = null, array $parameters = array());
 
-    public function getLogicConditions()
-    {
-        /** @var string[] $dependencyConditions Collection of all dependencies */
-        $dependencyConditions = array();
-
-        /** @var self $delegate Gather all condition from all delegated containers */
-        foreach ($this->delegates as $delegate) {
-            $dependencyConditions[] = $delegate->getLogicConditions();
-        }
-
-        return $dependencyConditions;
-    }
+    /**
+     * Generate container dependency condition code.
+     * @param string    $alias Entity alias
+     * @param mixed     $entity Entity
+     */
+    abstract protected function generateCondition($alias, $entity);
 }

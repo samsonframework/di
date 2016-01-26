@@ -12,34 +12,50 @@ namespace samsonframework\di;
  */
 class ClosureContainer extends AbstractContainer
 {
-    public function getLogicConditions()
+    protected function getSpaces($line)
     {
-        foreach ($this->dependencies as $alias => $callback) {
-            // Get closure reflection
-            $reflection = new \ReflectionFunction($callback);
-            // Read closure file
-            $lines = file($reflection->getFileName());
-            $opened = 0;
-            // Read only closure lines
-            for ($l = $reflection->getStartLine(); $l < $reflection->getEndLine(); $l++) {
-                // Fix opening braces scope
-                if (strpos($lines[$l], '{') !== false) {
-                    $opened++;
-                }
+        if (preg_match('/(\s+)[^\s]/', $line, $matches)) {
+            return $matches[1];
+        }
+        return '';
+    }
+    /**
+     * Generate container dependency condition code.
+     * @param string    $alias Entity alias
+     * @param mixed     $entity Entity
+     */
+    public function generateCondition($alias, $entity)
+    {
+        // Get closure reflection
+        $reflection = new \ReflectionFunction($entity);
+        // Read closure file
+        $lines = file($reflection->getFileName());
 
-                // Fix closing braces scope
-                if (strpos($lines[$l], '}') !== false) {
-                    $opened--;
-                }
+        $indentation = $this->getSpaces($lines[$reflection->getStartLine()]);
 
-                // Break if we reached closure end
-                if ($opened === -1) {
-                    break;
-                }
-
-                // Add closure code
-                $this->generator->newLine(trim($lines[$l]));
+        $opened = 0;
+        // Read only closure lines
+        for ($l = $reflection->getStartLine(); $l < $reflection->getEndLine(); $l++) {
+            // Fix opening braces scope
+            if (strpos($lines[$l], '{') !== false) {
+                $opened++;
             }
+
+            // Fix closing braces scope
+            if (strpos($lines[$l], '}') !== false) {
+                $opened--;
+            }
+
+            // Break if we reached closure end
+            if ($opened === -1) {
+                break;
+            }
+
+            // Cut only base $indentation to beautify output
+            $spaces = substr($this->getSpaces($lines[$l]), strlen($indentation));
+
+            // Add closure code
+            $this->generator->newLine($spaces.trim($lines[$l]));
         }
     }
 
