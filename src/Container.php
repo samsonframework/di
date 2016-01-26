@@ -34,6 +34,40 @@ class Container extends AbstractContainer
     }
 
     /**
+     * Analyze class construtor dependencies and create tree for nested dependencies.
+     *
+     * @param \ReflectionMethod $constructor Reflection method __constructor instance
+     * @param string $className
+     * @param array  $dependencies Reference to tree for filling up
+     *
+     * @throws ClassNotFoundException
+     */
+    protected function buildConstructorDependencies(\ReflectionMethod $constructor, $className, &$dependencies)
+    {
+        // Iterate all dependencies
+        foreach ($constructor->getParameters() as $parameter) {
+            // Ignore optional parameters
+            if (!$parameter->isOptional()) {
+                // Read dependency class name
+                $dependencyClass = $this->getClassName($parameter);
+
+                // Set pointer to parameter as it can be set before
+                $parameterPointer = &$dependencies[$className][$parameter->getName()];
+
+                // If we have found dependency class
+                if ($dependencyClass !== null) {
+                    // Point dependency class name
+                    $parameterPointer = $dependencyClass;
+                    // Go deeper in recursion and pass new branch there
+                    $this->buildDependenciesTree($dependencyClass, $dependencies);
+                }
+            } else { // Stop iterating as first optional parameter is met
+                break;
+            }
+        }
+    }
+
+    /**
      * Recursively build class constructor dependencies tree.
      * TODO: Analyze recurrent dependencies and throw an exception
      *
@@ -51,27 +85,7 @@ class Container extends AbstractContainer
             // We can build dependency tree only from constructor dependencies
             $constructor = $class->getConstructor();
             if (null !== $constructor) {
-                // Iterate all dependencies
-                foreach ($constructor->getParameters() as $parameter) {
-                    // Ignore optional parameters
-                    if (!$parameter->isOptional()) {
-                        // Read dependency class name
-                        $dependencyClass = $this->getClassName($parameter);
-
-                        // Set pointer to parameter as it can be set before
-                        $parameterPointer = &$dependencies[$className][$parameter->getName()];
-
-                        // If we have found dependency class
-                        if ($dependencyClass !== null) {
-                            // Point dependency class name
-                            $parameterPointer = $dependencyClass;
-                            // Go deeper in recursion and pass new branch there
-                            $this->buildDependenciesTree($dependencyClass, $dependencies);
-                        }
-                    } else { // Stop iterating as first optional parameter is met
-                        break;
-                    }
-                }
+                $this->buildConstructorDependencies($constructor, $className, $dependencies);
             }
         } else { // Something went wrong and class is not auto loaded and missing
             throw new ClassNotFoundException($className);

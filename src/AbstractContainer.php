@@ -170,7 +170,7 @@ abstract class AbstractContainer implements ContainerInterface
             $condition = $inputVariable . ' === \'' . $alias . '\'';
             // If we have an alias for this - add it to condition
             $condition .= array_key_exists($alias, $this->aliases)
-                ? ' || Added' . $inputVariable . ' === \'' . $this->aliases[$alias] . '\''
+                ? ' || ' . $inputVariable . ' === \'' . $this->aliases[$alias] . '\''
                 : '';
             // Output condition branch
             $this->generator->$conditionFunc($condition);

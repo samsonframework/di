@@ -135,7 +135,6 @@ Also we are not supporting ```use``` closure syntax as it should be using contex
 
 ##Installation
 You can install this package through Composer:
-
 ```composer require samsonframework/di```
 
 The packages adheres to the SemVer specification, and there will be full backward compatibility between minor versions.

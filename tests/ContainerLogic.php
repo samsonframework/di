@@ -4,7 +4,7 @@ function diContainer($aliasOrClassName)
     static $services;
     $aliasOrClassName;
     
-    if ($aliasOrClassName === '\samsonframework\di\tests\OtherTestClass'||$aliasOrClassName === 'otherTestModule') {
+    if ($aliasOrClassName === '\samsonframework\di\tests\OtherTestClass' || $aliasOrClassName === 'otherTestModule') {
         return new \samsonframework\di\tests\OtherTestClass(
             new \samsonframework\di\tests\OtherThirdTestClass(
                 new \samsonframework\di\tests\OtherSecondTestClass()
@@ -21,7 +21,7 @@ function diContainer($aliasOrClassName)
         return new \samsonframework\di\tests\OtherThirdTestClass(
             new \samsonframework\di\tests\OtherSecondTestClass()
         );
-    } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestModuleClass'||$aliasOrClassName === 'testModule') {
+    } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestModuleClass' || $aliasOrClassName === 'testModule') {
         return new \samsonframework\di\tests\TestModuleClass(
             new \samsonframework\di\tests\OtherTestClass(
                 new \samsonframework\di\tests\OtherThirdTestClass(
@@ -43,7 +43,7 @@ function diContainer($aliasOrClassName)
             ),
             'I am string'
         );
-    } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestServiceClass'||$aliasOrClassName === 'testService') {
+    } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestServiceClass' || $aliasOrClassName === 'testService') {
         return isset($services['\samsonframework\di\tests\TestServiceClass'])
         ? $services['\samsonframework\di\tests\TestServiceClass']
         : $services['\samsonframework\di\tests\TestServiceClass'] = new \samsonframework\di\tests\TestServiceClass(
@@ -75,7 +75,7 @@ function diContainer($aliasOrClassName)
             ),
             'I am string'
         );
-    } elseif ($aliasOrClassName === 'callbackTest'||$aliasOrClassName === 'closure056a800c4e0d5c4.86596736') {
+    } elseif ($aliasOrClassName === 'callbackTest' || $aliasOrClassName === 'closure056a80301a1aae9.24980336') {
         return new \samsonframework\di\tests\OtherTestClass(
             new \samsonframework\di\tests\OtherThirdTestClass(
                 new \samsonframework\di\tests\OtherSecondTestClass()
