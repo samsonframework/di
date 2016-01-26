@@ -15,6 +15,7 @@ use samsonphp\generator\Generator;
 //TODO: Lazy creation by default, need to use Mocks and magic methods.
 //TODO: existing instances passing to logic function.
 //TODO: closure and other fully qualified name resolving
+//TODO: Separate generator to a new class
 
 /**
  * Dependency injection container.
@@ -48,6 +49,11 @@ class Container implements ContainerInterface
     public function __construct(Generator $generator)
     {
         $this->generator = $generator;
+    }
+
+    public function resolve($source, $destination)
+    {
+
     }
 
     /**

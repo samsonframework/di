@@ -34,6 +34,17 @@ interface ContainerInterface extends \Interop\Container\ContainerInterface
     public function service($className, $alias = null, array $parameters = array());
 
     /**
+     * Help container resolving interfaces and abstract classes or any entities to
+     * different one.
+     *
+     * @param string $source Source entity name
+     * @param string $destination Destination entity name
+     *
+     * @return self Chaining
+     */
+    public function resolve($source, $destination);
+
+    /**
      * Set service dependency by passing object instance.
      *
      * @param mixed $instance Instance that needs to be return by this dependency
