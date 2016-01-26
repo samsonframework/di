@@ -182,7 +182,7 @@ class Container extends AbstractContainer
      * @throws ConstructorParameterNotSetException
      *
      */
-    protected function generateCondition($className, $dependencies, $level = 0)
+    protected function generateCondition($className, &$dependencies, $level = 0)
     {
         $this->generator->newLine(($level === 0) ? 'return ' : '');
 

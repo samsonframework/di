@@ -179,7 +179,9 @@ abstract class AbstractContainer implements ContainerInterface
         /** @var self $delegate Iterate delegated container to get their conditions */
         foreach ($this->delegates as $delegate) {
             // Set current generator
-            $delegate->generator = $this->generator;
+            if ($delegate instanceof AbstractContainer) {
+                $delegate->generator = $this->generator;
+            }
             $delegate->generateConditions($inputVariable, $started);
         }
     }
@@ -225,5 +227,5 @@ abstract class AbstractContainer implements ContainerInterface
      * @param string    $alias Entity alias
      * @param mixed     $entity Entity
      */
-    abstract protected function generateCondition($alias, $entity);
+    abstract protected function generateCondition($alias, &$entity);
 }

@@ -24,7 +24,7 @@ class ClosureContainer extends AbstractContainer
      * @param string    $alias Entity alias
      * @param mixed     $entity Entity
      */
-    public function generateCondition($alias, $entity)
+    public function generateCondition($alias, &$entity)
     {
         // Get closure reflection
         $reflection = new \ReflectionFunction($entity);
