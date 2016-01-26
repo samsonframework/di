@@ -194,7 +194,6 @@ class Container extends AbstractContainer
 
         // Iterate all dependencies for this class
         foreach ($dependencies as $variable => $dependency) {
-
             $this->parseClassDependencies($dependency, $variable, $className, $level);
 
             // Add comma if this is not last dependency
