@@ -16,6 +16,7 @@ use samsonframework\di\exception\NotFoundException;
  */
 abstract class AbstractContainer implements ContainerInterface
 {
+    /** Default logic function name */
     const LOGIC_FUNCTION_NAME = 'diContainer';
 
     /** @var array[string] Collection of alias => class name for alias resolving */
@@ -29,6 +30,12 @@ abstract class AbstractContainer implements ContainerInterface
 
     /** @var ContainerInterface[] Collection of delegated containers */
     protected $delegates = array();
+
+    /** @var array[string] Collection of dependency parameters */
+    protected $parameters = array();
+
+    /** @var \samsonphp\generator\Generator */
+    protected $generator;
 
     /**
      * Help container resolving interfaces and abstract classes or any entities to
@@ -75,16 +82,20 @@ abstract class AbstractContainer implements ContainerInterface
         // Get pointer from logic
         $module = $this->logic($alias);
 
+        // Try delegate lookup
         if (null === $module) {
-            // Try delegate lookup
             foreach ($this->delegates as $delegate) {
                 try {
                     $module = $delegate->get($alias);
-                } catch (\Exception $e) {
+                } catch (ContainerException $e) {
+                    // Catch all delegated exceptions
+                } catch (NotFoundException $e) {
                     // Catch all delegated exceptions
                 }
             }
+        }
 
+        if (null === $module) {
             throw new NotFoundException($alias);
         } else {
             if (!is_object($module)) {
@@ -117,8 +128,18 @@ abstract class AbstractContainer implements ContainerInterface
      */
     public function has($alias)
     {
-        return array_key_exists($alias, $this->dependencies)
-        || array_key_exists($alias, $this->aliases);
+        $found = array_key_exists($alias, $this->dependencies)
+            || array_key_exists($alias, $this->aliases);
+
+        if (!$found) {
+            foreach ($this->delegates as $delegate) {
+                if ($delegate->has($alias)) {
+                    return true;
+                }
+            }
+        }
+
+        return $found;
     }
 
     /**
@@ -131,4 +152,17 @@ abstract class AbstractContainer implements ContainerInterface
      * @return self Chaining
      */
     abstract public function set($entity, $alias = null, array $parameters = array());
+
+    public function getLogicConditions()
+    {
+        /** @var string[] $dependencyConditions Collection of all dependencies */
+        $dependencyConditions = array();
+
+        /** @var self $delegate Gather all condition from all delegated containers */
+        foreach ($this->delegates as $delegate) {
+            $dependencyConditions[] = $delegate->getLogicConditions();
+        }
+
+        return $dependencyConditions;
+    }
 }

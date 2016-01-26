@@ -54,10 +54,8 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
             );
         }, 'callbackTest');
 
-        $serviceContainer = new ClosureContainer(new Generator());
-
-
-        $this->container->delegate($serviceContainer);
+        //$serviceContainer = new ClosureContainer(new Generator());
+        //$this->container->delegate($serviceContainer);
     }
 
     public function testGet()
