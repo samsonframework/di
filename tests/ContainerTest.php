@@ -7,7 +7,9 @@
  */
 namespace samsonframework\di\tests;
 
+use samsonframework\di\ClosureContainer;
 use samsonframework\di\Container;
+use samsonframework\di\ServiceContainer;
 use samsonphp\generator\Generator;
 
 require 'TestModuleClass.php';
@@ -51,6 +53,19 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
                 '1'
             );
         }, 'callbackTest');
+
+        $serviceContainer = new ClosureContainer(new Generator());
+        $serviceContainer->callback(function() {
+            return new \samsonframework\di\tests\OtherTestClass(
+                new \samsonframework\di\tests\OtherThirdTestClass(
+                    new \samsonframework\di\tests\OtherSecondTestClass()
+                ),
+                array('1'),
+                '1'
+            );
+        }, 'callbackTest');
+
+        $this->container->delegate($serviceContainer);
     }
 
     public function testGet()
