@@ -31,7 +31,7 @@ will get all declared classes, find ones created by user and call ```set()``` fo
 All our packages have same goal in mind - [Programmable logic](https://en.wikipedia.org/wiki/Programmable_logic_device).
 We are trying to create system that can be easily configurable and usable and them using best practises, knowing all internal
 logic and structure of a package, generate maximum possible performant PHP code to repeat same logic. This generated
-code is ment to be used only in production environment and guarantees 100% logic and functionality compatibility with source code.
+code is meant to be used only in production environment and guarantees 100% logic and functionality compatibility with source code.
 
 ### Simple language
 This implementation is lacking all other needed and awesome features like injectors and configurations(for now), but
