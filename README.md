@@ -19,6 +19,13 @@ SamsonFramework dependency injection container implementation
  * Implements [container-interop](https://github.com/container-interop/container-interop)(PSR-11).
  * Implements [container-interop delegate lookup feature](https://github.com/container-interop/container-interop/blob/master/docs/Delegate-lookup.md).
  
+##Auto-wiring
+We do not support these feature as we suppose that your software using this awesome package should declare
+which entities need resolving using ```set()``` method. But feel free to create a ```AutoWireContainer``` that
+will get all declared classes, find ones created by user and call ```set()``` for them.
+
+>I really do not think that you need to auto-wire all existing classes.
+ 
 ###Why we are the fastest
 This implementation is lacking all other needed and awesome features like injectors and configurations(for now), but
 this is fastest possible dependency injection implementation. The core of its performance is generated PHP code. We perform
