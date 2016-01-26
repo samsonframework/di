@@ -29,6 +29,9 @@ class Container implements ContainerInterface
     /** @var array[string] Collection of alias => class name for alias resolving */
     protected $aliases = array();
 
+    /** @var array[string] Collection of entity name resolving */
+    protected $resolver = array();
+
     /** @var array[string] Collection of alias => closure for alias resolving */
     protected $callbacks = array();
 
@@ -51,9 +54,20 @@ class Container implements ContainerInterface
         $this->generator = $generator;
     }
 
+    /**
+     * Help container resolving interfaces and abstract classes or any entities to
+     * different one.
+     *
+     * @param string $source Source entity name
+     * @param string $destination Destination entity name
+     *
+     * @return self Chaining
+     */
     public function resolve($source, $destination)
     {
+        $this->resolver[$source] = $destination;
 
+        return $this;
     }
 
     /**
