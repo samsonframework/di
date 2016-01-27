@@ -11,13 +11,15 @@ SamsonFramework dependency injection container implementation
 
 ##Main features:
  * The fastest possible dependency injection container implementation.
- * ```25/01/2016``` DOES NOT(yet) support setter injections.
- * ```25/01/2016``` DOES NOT(yet) support existing instances as dependencies.
  * Supports regular constructor parameters combined with type hinted dependencies.
  * Supports closures as dependencies.
  * Supports services - singleton object instance that needs to be created only once.
  * Implements [container-interop](https://github.com/container-interop/container-interop)(PSR-11).
  * Implements [container-interop delegate lookup feature](https://github.com/container-interop/container-interop/blob/master/docs/Delegate-lookup.md).
+ 
+## TODO
+ * ```25/01/2016``` DOES NOT(yet) support setter injections.
+ * ```25/01/2016``` DOES NOT(yet) support existing instances as dependencies.
  
 ##Auto-wiring
 We do not support these feature as we suppose that your software using this awesome package should declare
