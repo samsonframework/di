@@ -18,6 +18,7 @@ require_once 'OtherTestClass.php';
 require_once 'OtherSecondTestClass.php';
 require_once 'OtherThirdTestClass.php';
 require_once 'OtherInterfaceTestClass.php';
+require_once 'EmptyTestClass.php';
 
 class ContainerTest extends \PHPUnit_Framework_TestCase
 {
@@ -58,6 +59,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
         $closureContainer = new ClosureContainer(new Generator());
         $closureContainer->set(function() {
+            if (true) {
+                /*just for test*/
+            }
             return new \samsonframework\di\tests\OtherTestClass(
                 new \samsonframework\di\tests\OtherThirdTestClass(
                     new \samsonframework\di\tests\OtherSecondTestClass()
@@ -74,6 +78,18 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('\samsonframework\di\exception\ContainerException');
         $this->container->get('doesNotMatter');
+    }
+
+    public function testLogicGeneration()
+    {
+        $this->setExpectedException('\samsonframework\di\exception\ConstructorParameterNotSetException');
+        $this->container->set('\samsonframework\di\tests\EmptyTestClass');
+
+        // Create logic and import it
+        $logic = $this->container->generateFunction();
+        $path = __DIR__.'/ContainerLogic.php';
+        file_put_contents($path, '<?php '.$logic);
+        require_once $path;
     }
 
     public function testFakeClass()

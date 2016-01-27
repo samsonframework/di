@@ -14,10 +14,8 @@ class ClosureContainer extends AbstractContainer
 {
     protected function getSpaces($line)
     {
-        if (preg_match('/(\s+)[^\s]/', $line, $matches)) {
-            return $matches[1];
-        }
-        return '';
+        preg_match('/(\s+)[^\s]/', $line, $matches);
+        return $matches[1];
     }
     /**
      * Generate container dependency condition code.

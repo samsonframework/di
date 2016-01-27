@@ -85,7 +85,10 @@ function diContainer($aliasOrClassName)
             ),
             'I am string'
         );
-    } elseif ($aliasOrClassName === 'callbackTest' || $aliasOrClassName === 'closure056a8200db9f536.06962516') {
+    } elseif ($aliasOrClassName === 'callbackTest' || $aliasOrClassName === 'closure056a825fd358d50.68225741') {
+        if (true) {
+            /*just for test*/
+        }
         return new \samsonframework\di\tests\OtherTestClass(
             new \samsonframework\di\tests\OtherThirdTestClass(
                 new \samsonframework\di\tests\OtherSecondTestClass()

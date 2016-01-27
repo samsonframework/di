@@ -151,8 +151,7 @@ class Container extends AbstractContainer
             $this->generator
                 ->text('isset('.self::STATIC_COLLECTION_VARIABLE.'[\''.$className.'\'])')
                 ->newLine('? '.self::STATIC_COLLECTION_VARIABLE.'[\''.$className.'\']')
-                ->newLine(': '.self::STATIC_COLLECTION_VARIABLE.'[\''.$className.'\'] = new '.$className.'(')
-                ->tabs++;
+                ->newLine(': '.self::STATIC_COLLECTION_VARIABLE.'[\''.$className.'\'] = new '.$className.'(')->tabs++;
         } else {
             // Start object instance creation
             $this->generator->text('new ' . $className . '(')->tabs++;
