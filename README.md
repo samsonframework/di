@@ -31,7 +31,7 @@ will get all declared classes, find ones created by user and call ```set()``` fo
 ##Why we are the fastest
 ### Concept = Programmable logic
 All our packages have same goal in mind - [Programmable logic](https://en.wikipedia.org/wiki/Programmable_logic_device).
-We are trying to create system that can be easily configurable and usable and them using best practises, knowing all internal
+We are trying to create system that can be easily configurable and usable and then using best practises, knowing all internal
 logic and structure of a package, generate maximum possible performant PHP code to repeat same logic. This generated
 code is meant to be used only in production environment and guarantees 100% logic and functionality compatibility with source code.
 
@@ -43,10 +43,10 @@ static analysis of defined entities and their dependencies and generate PHP code
 function diContainer($aliasOrClassName)
 {
     static $services;
+    $aliasOrClassName;
     
-    if ($aliasOrClassName === '\samsonframework\di\tests\OtherTestClass') {
-        return 
-        new \samsonframework\di\tests\OtherTestClass(
+    if ($aliasOrClassName === '\samsonframework\di\tests\OtherTestClass' || $aliasOrClassName === 'otherTestModule') {
+        return new \samsonframework\di\tests\OtherTestClass(
             new \samsonframework\di\tests\OtherThirdTestClass(
                 new \samsonframework\di\tests\OtherSecondTestClass()
             ),
@@ -59,13 +59,11 @@ function diContainer($aliasOrClassName)
             'I am string2'
         );
     } elseif ($aliasOrClassName === '\samsonframework\di\tests\OtherThirdTestClass') {
-        return 
-        new \samsonframework\di\tests\OtherThirdTestClass(
+        return new \samsonframework\di\tests\OtherThirdTestClass(
             new \samsonframework\di\tests\OtherSecondTestClass()
         );
-    } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestModuleClass') {
-        return 
-        new \samsonframework\di\tests\TestModuleClass(
+    } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestModuleClass' || $aliasOrClassName === 'testModule') {
+        return new \samsonframework\di\tests\TestModuleClass(
             new \samsonframework\di\tests\OtherTestClass(
                 new \samsonframework\di\tests\OtherThirdTestClass(
                     new \samsonframework\di\tests\OtherSecondTestClass()
@@ -86,9 +84,18 @@ function diContainer($aliasOrClassName)
             ),
             'I am string'
         );
-    } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestServiceClass') {
-        return 
-        isset($services['\samsonframework\di\tests\TestServiceClass'])
+    } elseif ($aliasOrClassName === '\samsonframework\di\tests\OtherInterfaceTestClass' || $aliasOrClassName === 'testImplementsModule') {
+        return new \samsonframework\di\tests\OtherInterfaceTestClass(
+            '\samsonframework\di\tests\TestInterface',
+            array(
+                '0' => '1',
+                '1' => '2',
+                '2' => '3',
+            ),
+            'I am string'
+        );
+    } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestServiceClass' || $aliasOrClassName === 'testService') {
+        return isset($services['\samsonframework\di\tests\TestServiceClass'])
         ? $services['\samsonframework\di\tests\TestServiceClass']
         : $services['\samsonframework\di\tests\TestServiceClass'] = new \samsonframework\di\tests\TestServiceClass(
             new \samsonframework\di\tests\TestModuleClass(
@@ -119,13 +126,16 @@ function diContainer($aliasOrClassName)
             ),
             'I am string'
         );
-    } elseif ($aliasOrClassName === 'callbackTest') {
+    } elseif ($aliasOrClassName === 'callbackTest' || $aliasOrClassName === 'closure056a825fd358d50.68225741') {
+        if (true) {
+            /*just for test*/
+        }
         return new \samsonframework\di\tests\OtherTestClass(
-        new \samsonframework\di\tests\OtherThirdTestClass(
-        new \samsonframework\di\tests\OtherSecondTestClass()
-        ),
-        array('1'),
-        '1'
+            new \samsonframework\di\tests\OtherThirdTestClass(
+                new \samsonframework\di\tests\OtherSecondTestClass()
+            ),
+            array('1'),
+            '1'
         );
     }
 }
