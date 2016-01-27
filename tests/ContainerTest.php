@@ -11,11 +11,13 @@ use samsonframework\di\ClosureContainer;
 use samsonframework\di\Container;
 use samsonphp\generator\Generator;
 
+require_once 'TestInterface.php';
 require_once 'TestModuleClass.php';
 require_once 'TestServiceClass.php';
 require_once 'OtherTestClass.php';
 require_once 'OtherSecondTestClass.php';
 require_once 'OtherThirdTestClass.php';
+require_once 'OtherInterfaceTestClass.php';
 
 class ContainerTest extends \PHPUnit_Framework_TestCase
 {
@@ -37,6 +39,17 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
             array('arrayParam' => array(1,2,3), 'stringParam' => 'I am string')
         );
 
+        $this->container->resolve(
+            '\samsonframework\di\tests\TestInterface',
+            '\samsonframework\di\tests\OtherSecondTestClass'
+        );
+
+        $this->container->set(
+            '\samsonframework\di\tests\OtherInterfaceTestClass',
+            'testImplementsModule',
+            array('arrayParam' => array(1,2,3), 'stringParam' => 'I am string')
+        );
+
         $this->container->service(
             '\samsonframework\di\tests\TestServiceClass',
             'testService',
@@ -55,12 +68,26 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         }, 'callbackTest');
 
         $this->container->delegate($closureContainer);
+    }
 
+    public function testLogicFailed()
+    {
+        $this->setExpectedException('\samsonframework\di\exception\ContainerException');
+        $this->container->get('doesNotMatter');
+    }
+
+    public function testFakeClass()
+    {
         // Create logic and import it
         $logic = $this->container->generateFunction();
         $path = __DIR__.'/ContainerLogic.php';
         file_put_contents($path, '<?php '.$logic);
         require_once $path;
+
+        $this->setExpectedException('\samsonframework\di\exception\ClassNotFoundException');
+        $this->container->set('IDoNotExist', 'fake');
+
+        $this->container->get('fake');
     }
 
     public function testGet()
@@ -81,11 +108,22 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($service instanceof \samsonframework\di\tests\TestServiceClass);
         $this->assertTrue($service === $service2);
         $this->assertTrue($service->dependency1 === $service2->dependency1);
+
+        $this->setExpectedException('\samsonframework\di\exception\NotFoundException');
+        $instance = $this->container->get('IDoNotExists');
     }
 
     public function testHas()
     {
         $this->assertTrue($this->container->has('\samsonframework\di\tests\TestModuleClass'));
         $this->assertTrue($this->container->has('testModule'));
+        $this->assertTrue($this->container->has('callbackTest'));
+        $this->assertFalse($this->container->has('IDoNotExists'));
+    }
+
+    public function testClosure()
+    {
+        $closure = $this->container->get('callbackTest');
+        $this->assertTrue($closure instanceof \samsonframework\di\tests\OtherTestClass);
     }
 }

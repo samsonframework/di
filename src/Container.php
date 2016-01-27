@@ -79,6 +79,11 @@ class Container extends AbstractContainer
      */
     protected function buildDependenciesTree($className, array &$dependencies)
     {
+        // Resolve class name if present
+        $className = array_key_exists($className, $this->resolver)
+            ? $this->resolver[$className]
+            : $className;
+
         // We need this class to exists to use reflections, it will try to autoload it also
         if (class_exists($className)) {
             $class = new \ReflectionClass($className);

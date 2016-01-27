@@ -72,9 +72,14 @@ abstract class AbstractContainer implements ContainerInterface
      * @param string $alias Entity alias
      *
      * @return mixed Created instance or null
+     * @throws ContainerException
      */
     protected function logic($alias)
     {
+        if (!function_exists(self::LOGIC_FUNCTION_NAME)) {
+            throw new ContainerException('Logic function does not exists');
+        }
+
         return call_user_func(self::LOGIC_FUNCTION_NAME, $alias);
     }
 
@@ -109,11 +114,7 @@ abstract class AbstractContainer implements ContainerInterface
         if (null === $module) {
             throw new NotFoundException($alias);
         } else {
-            if (!is_object($module)) {
-                throw new ContainerException($alias);
-            } else {
-                return $module;
-            }
+            return $module;
         }
     }
 

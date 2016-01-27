@@ -43,6 +43,16 @@ function diContainer($aliasOrClassName)
             ),
             'I am string'
         );
+    } elseif ($aliasOrClassName === '\samsonframework\di\tests\OtherInterfaceTestClass' || $aliasOrClassName === 'testImplementsModule') {
+        return new \samsonframework\di\tests\OtherInterfaceTestClass(
+            '\samsonframework\di\tests\TestInterface',
+            array(
+                '0' => '1',
+                '1' => '2',
+                '2' => '3',
+            ),
+            'I am string'
+        );
     } elseif ($aliasOrClassName === '\samsonframework\di\tests\TestServiceClass' || $aliasOrClassName === 'testService') {
         return isset($services['\samsonframework\di\tests\TestServiceClass'])
         ? $services['\samsonframework\di\tests\TestServiceClass']
@@ -75,7 +85,7 @@ function diContainer($aliasOrClassName)
             ),
             'I am string'
         );
-    } elseif ($aliasOrClassName === 'callbackTest' || $aliasOrClassName === 'closure056a80301a1aae9.24980336') {
+    } elseif ($aliasOrClassName === 'callbackTest' || $aliasOrClassName === 'closure056a8200db9f536.06962516') {
         return new \samsonframework\di\tests\OtherTestClass(
             new \samsonframework\di\tests\OtherThirdTestClass(
                 new \samsonframework\di\tests\OtherSecondTestClass()
