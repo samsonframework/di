@@ -52,7 +52,7 @@ class Container extends AbstractContainer
                 $dependencyClass = $this->getClassName($parameter);
 
                 // Set pointer to parameter as it can be set before
-                $parameterPointer = &$dependencies[$className][$parameter->getName()];
+                $parameterPointer = &$dependencies[$className][$parameter->name];
 
                 // If we have found dependency class
                 if ($dependencyClass !== null) {

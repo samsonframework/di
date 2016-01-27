@@ -85,7 +85,7 @@ function diContainer($aliasOrClassName)
             ),
             'I am string'
         );
-    } elseif ($aliasOrClassName === 'callbackTest' || $aliasOrClassName === 'closure056a825fd358d50.68225741') {
+    } elseif ($aliasOrClassName === 'callbackTest' || $aliasOrClassName === 'closure056a8bd26a5f2a1.77653437') {
         if (true) {
             /*just for test*/
         }
