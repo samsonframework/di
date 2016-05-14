@@ -20,6 +20,8 @@ SamsonFramework dependency injection container implementation
 ## TODO
  * ```25/01/2016``` DOES NOT(yet) support setter injections.
  * ```25/01/2016``` DOES NOT(yet) support existing instances as dependencies.
+ * ```14/05/2016``` DOES NOT(yet) support container values setting and getting by keys.
+ * ```14/05/2016``` DOES NOT(yet) support container simple setting and/or chaining.
  
 ##Auto-wiring
 We do not support these feature as we suppose that your software using this awesome package should declare
