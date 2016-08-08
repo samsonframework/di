@@ -6,6 +6,7 @@
 namespace samsonframework\di;
 
 use Interop\Container\ContainerInterface;
+use samsonframework\di\exception\ClassNotFoundException;
 use samsonframework\di\exception\ContainerException;
 use samsonframework\di\exception\NotFoundException;
 use samsonphp\generator\Generator;
@@ -52,22 +53,6 @@ abstract class AbstractContainer implements ContainerInterface
     }
 
     /**
-     * Help container resolving interfaces and abstract classes or any entities to
-     * different one.
-     *
-     * @param string $source      Source entity name
-     * @param string $destination Destination entity name
-     *
-     * @return self Chaining
-     */
-    public function resolve($source, $destination)
-    {
-        $this->resolver[$source] = $destination;
-
-        return $this;
-    }
-
-    /**
      * Internal logic handler. Calls generated logic function
      * for performing entity creation or search. This is encapsulated
      * method for further overriding.
@@ -91,8 +76,8 @@ abstract class AbstractContainer implements ContainerInterface
      *
      * @param string $alias Identifier of the entry to look for.
      *
-     * @throws NotFoundException  No entry was found for this identifier.
-     * @throws ContainerException Error while retrieving the entry.
+     * @throws \Interop\Container\Exception\NotFoundException
+     * @throws \Interop\Container\Exception\ContainerException
      *
      * @return mixed Entry.
      */
@@ -108,14 +93,14 @@ abstract class AbstractContainer implements ContainerInterface
                     $module = $delegate->get($alias);
                 } catch (ContainerException $e) {
                     // Catch all delegated exceptions
-                } catch (NotFoundException $e) {
+                } catch (ClassNotFoundException $e) {
                     // Catch all delegated exceptions
                 }
             }
         }
 
         if (null === $module) {
-            throw new NotFoundException($alias);
+            throw new ClassNotFoundException($alias);
         } else {
             return $module;
         }
@@ -228,12 +213,12 @@ abstract class AbstractContainer implements ContainerInterface
      * Set container dependency.
      *
      * @param mixed       $entity     Entity
-     * @param string|null $alias      Entity alias for simplier finding
      * @param array       $parameters Collection of additional parameters
+     * @param string|null $alias      Entity alias for simple finding
      *
-     * @return self Chaining
+     * @return $this Chaining
      */
-    abstract public function set($entity, $alias = null, array $parameters = array());
+    abstract public function set($entity, array $parameters, $alias = null);
 
     /**
      * Generate container dependency condition code.

@@ -5,7 +5,7 @@
  */
 namespace samsonframework\di\tests;
 
-class EmptyTestClass implements TestInterface
+class EmptyTestClass
 {
     protected $failedParam;
 

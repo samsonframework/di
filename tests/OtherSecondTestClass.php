@@ -5,7 +5,7 @@
  */
 namespace samsonframework\di\tests;
 
-class OtherSecondTestClass implements TestInterface
+class OtherSecondTestClass
 {
 
 }

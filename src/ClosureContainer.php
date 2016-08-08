@@ -66,7 +66,7 @@ class ClosureContainer extends AbstractContainer
      *
      * @return self Chaining
      */
-    public function set($entity, $alias = null, array $parameters = array())
+    public function set($entity, array $parameters, $alias = null)
     {
         // Add unique closure alias
         $this->aliases[$alias] = 'closure' . uniqid(0, 99999);

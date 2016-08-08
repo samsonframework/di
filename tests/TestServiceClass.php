@@ -7,6 +7,7 @@ namespace samsonframework\di\tests;
 
 class TestServiceClass
 {
+    /** @var TestModuleClass  */
     public $dependency1;
     public $array;
     public $string;
