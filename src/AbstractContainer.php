@@ -24,9 +24,6 @@ abstract class AbstractContainer implements ContainerInterface
     /** @var array[string] Collection of alias => class name for alias resolving */
     protected $aliases = array();
 
-    /** @var array[string] Collection of entity name resolving */
-    protected $resolver = array();
-
     /** @var array[string] Collection of class name dependencies trees */
     protected $dependencies = array();
 
@@ -78,6 +75,8 @@ abstract class AbstractContainer implements ContainerInterface
      *
      * @throws \Interop\Container\Exception\NotFoundException
      * @throws \Interop\Container\Exception\ContainerException
+     * @throws \samsonframework\di\exception\ContainerException
+     * @throws \samsonframework\di\exception\ClassNotFoundException
      *
      * @return mixed Entry.
      */
@@ -129,7 +128,7 @@ abstract class AbstractContainer implements ContainerInterface
     public function has($alias)
     {
         $found = array_key_exists($alias, $this->dependencies)
-            || in_array($alias, $this->aliases);
+            || in_array($alias, $this->aliases, true);
 
         if (!$found) {
             foreach ($this->delegates as $delegate) {
