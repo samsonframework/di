@@ -23,7 +23,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     protected function createLogic($function = 'container')
     {
         // Create logic and import it
-        $logic = $this->container->generateFunction($function);
+        $logic = $this->container->build($function);
         $path = __DIR__.'/ContainerLogic.php';
         @unlink($path);
         file_put_contents($path, '<?php '.$logic);

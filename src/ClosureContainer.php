@@ -12,11 +12,19 @@ namespace samsonframework\di;
  */
 class ClosureContainer extends AbstractContainer
 {
+    /**
+     * Get line indentation string.
+     *
+     * @param string $line Line string
+     *
+     * @return string Line indentation string
+     */
     protected function getSpaces($line)
     {
         preg_match('/(\s+)[^\s]/', $line, $matches);
         return $matches[1];
     }
+
     /**
      * Generate container dependency condition code.
      * @param string    $alias Entity alias

@@ -187,7 +187,7 @@ abstract class AbstractContainer implements ContainerInterface
      *
      * @return string PHP logic function code
      */
-    public function generateFunction($functionName = self::LOGIC_FUNCTION_NAME)
+    public function build($functionName = self::LOGIC_FUNCTION_NAME)
     {
         // Store logic callable
         $this->logicCallable = $functionName;
