@@ -128,13 +128,13 @@ class Container extends AbstractContainer
     public function set($className, $alias = null, array $parameters = array())
     {
         // Add this class dependencies to dependency tree
-        $this->dependencies = array_merge(
-            $this->dependencies,
-            $this->buildDependenciesTree($className, $this->dependencies)
-        );
+//        $this->dependencies = array_merge(
+//            $this->dependencies,
+//            $this->buildDependenciesTree($className, $this->dependencies)
+//        );
 
         // Merge other class constructor parameters
-        $this->dependencies[$className] = array_merge($this->dependencies[$className], $parameters);
+        $this->dependencies[$className] = $parameters;
 
         // Store alias for this class name
         $this->aliases[$className] = $alias;
@@ -149,9 +149,9 @@ class Container extends AbstractContainer
         if (array_key_exists($className, $this->services)) {
             // Start service search or creation
             $this->generator
-                ->text('isset('.self::STATIC_COLLECTION_VARIABLE.'[\''.$className.'\'])')
-                ->newLine('? '.self::STATIC_COLLECTION_VARIABLE.'[\''.$className.'\']')
-                ->newLine(': '.self::STATIC_COLLECTION_VARIABLE.'[\''.$className.'\'] = new '.$className.'(')->tabs++;
+                ->text('isset('.self::STATIC_COLLECTION_VARIABLE.'[\''.$this->aliases[$className].'\'])')
+                ->newLine('? '.self::STATIC_COLLECTION_VARIABLE.'[\''.$this->aliases[$className].'\']')
+                ->newLine(': '.self::STATIC_COLLECTION_VARIABLE.'[\''.$this->aliases[$className].'\'] = new '.$className.'(')->tabs++;
         } else {
             // Start object instance creation
             $this->generator->text('new ' . $className . '(')->tabs++;

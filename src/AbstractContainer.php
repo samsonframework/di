@@ -38,6 +38,9 @@ abstract class AbstractContainer implements ContainerInterface
     /** @var \samsonphp\generator\Generator */
     protected $generator;
 
+    /** @var callable Logic function */
+    protected $logicCallable;
+
     /**
      * Container constructor.
      *
@@ -76,11 +79,11 @@ abstract class AbstractContainer implements ContainerInterface
      */
     protected function logic($alias)
     {
-        if (!function_exists(self::LOGIC_FUNCTION_NAME)) {
+        if (!function_exists($this->logicCallable)) {
             throw new ContainerException('Logic function does not exists');
         }
 
-        return call_user_func(self::LOGIC_FUNCTION_NAME, $alias);
+        return call_user_func($this->logicCallable, $alias);
     }
 
     /**
@@ -202,11 +205,13 @@ abstract class AbstractContainer implements ContainerInterface
      */
     public function generateFunction($functionName = self::LOGIC_FUNCTION_NAME)
     {
+        // Store logic callable
+        $this->logicCallable = $functionName;
+
         $inputVariable = '$aliasOrClassName';
         $this->generator
             ->defFunction($functionName, array($inputVariable))
             ->defVar('static $services')
-            ->defVar($inputVariable)
             ->newLine();
 
         // Generate all container and delegate conditions
