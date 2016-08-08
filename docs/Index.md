@@ -11,13 +11,13 @@
 ### Concept = Programmable logic
 All our packages have same goal in mind - [Programmable logic](https://en.wikipedia.org/wiki/Programmable_logic_device).
 We are trying to create system that can be easily configurable and usable and then using best practises, knowing all internal
-logic and structure of a package, generate maximum possible performant PHP code to repeat same logic. This generated
+logic and structure of a package, generate maximum possible performance PHP code to repeat same logic. This generated
 code is meant to be used only in production environment and guarantees 100% logic and functionality compatibility with source code.
 
 ### Simple language
-This implementation is lacking all other needed and awesome features like injectors and configurations(for now), but
-this is fastest possible dependency injection implementation. The core of its performance is generated PHP code. We perform
-static analysis of defined entities and their dependencies and generate PHP code logic function. Here is an example:
+This implementation is fastest possible dependency injection implementation. The core of its performance is generated PHP code which
+creates logic function with ```recursive``` dependency resolving. Here is an example:
+
 ```php
 function container($aliasOrClassName)
 {
