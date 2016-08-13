@@ -43,6 +43,14 @@ class ContainerTest extends TestCase
         static::assertEquals($alias, $this->getProperty('aliases', $this->container)[TestModuleClass::class]);
     }
 
+    public function testHas()
+    {
+        static::assertTrue($this->container->has(TestModuleClass::class));
+        static::assertTrue($this->container->has($this->testServiceAlias));
+        static::assertTrue($this->container->has(OtherThirdTestClass::class));
+        static::assertFalse($this->container->has('IDoNotExists'));
+    }
+
 //    public function testNestedClassContainer()
 //    {
 //        /** @var TestModuleClass $instance */
