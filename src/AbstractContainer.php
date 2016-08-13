@@ -6,25 +6,18 @@
 namespace samsonframework\di;
 
 use Interop\Container\ContainerInterface;
+use samsonframework\di\exception\ClassNotFoundException;
 use samsonframework\di\exception\ContainerException;
-use samsonframework\di\exception\NotFoundException;
-use samsonphp\generator\Generator;
 
 /**
  * Abstract dependency injection container.
  *
- * @package samsonframework\di
+ * @author Vitaly Iegorov <egorov@samsonos.com>
  */
 abstract class AbstractContainer implements ContainerInterface
 {
-    /** Default logic function name */
-    const LOGIC_FUNCTION_NAME = 'diContainer';
-
     /** @var array[string] Collection of alias => class name for alias resolving */
     protected $aliases = array();
-
-    /** @var array[string] Collection of entity name resolving */
-    protected $resolver = array();
 
     /** @var array[string] Collection of class name dependencies trees */
     protected $dependencies = array();
@@ -32,87 +25,50 @@ abstract class AbstractContainer implements ContainerInterface
     /** @var ContainerInterface[] Collection of delegated containers */
     protected $delegates = array();
 
-    /** @var array[string] Collection of dependency parameters */
-    protected $parameters = array();
+    /** @var callable Dependency resolving function callable */
+    protected $logicCallable;
 
-    /** @var \samsonphp\generator\Generator */
-    protected $generator;
 
     /**
-     * Container constructor.
+     * Wrapper for calling dependency resolving function.
      *
-     * @param Generator $generator
-     */
-    public function __construct(Generator $generator)
-    {
-        $this->generator = $generator;
-    }
-
-    /**
-     * Help container resolving interfaces and abstract classes or any entities to
-     * different one.
-     *
-     * @param string $source      Source entity name
-     * @param string $destination Destination entity name
-     *
-     * @return self Chaining
-     */
-    public function resolve($source, $destination)
-    {
-        $this->resolver[$source] = $destination;
-
-        return $this;
-    }
-
-    /**
-     * Internal logic handler. Calls generated logic function
-     * for performing entity creation or search. This is encapsulated
-     * method for further overriding.
-     *
-     * @param string $alias Entity alias
+     * @param string $dependency Dependency name
      *
      * @return mixed Created instance or null
      * @throws ContainerException
      */
-    protected function logic($alias)
+    protected function logic($dependency)
     {
-        if (!function_exists(self::LOGIC_FUNCTION_NAME)) {
+        if (!function_exists($this->logicCallable)) {
             throw new ContainerException('Logic function does not exists');
         }
 
-        return call_user_func(self::LOGIC_FUNCTION_NAME, $alias);
+        return call_user_func($this->logicCallable, $dependency);
     }
 
     /**
-     * Finds an entry of the container by its identifier and returns it.
-     *
-     * @param string $alias Identifier of the entry to look for.
-     *
-     * @throws NotFoundException  No entry was found for this identifier.
-     * @throws ContainerException Error while retrieving the entry.
-     *
-     * @return mixed Entry.
+     * {@inheritdoc}
      */
-    public function get($alias)
+    public function get($dependency)
     {
         // Get pointer from logic
-        $module = $this->logic($alias);
+        $module = $this->logic($dependency);
 
         // Try delegate lookup
         if (null === $module) {
             foreach ($this->delegates as $delegate) {
                 try {
-                    $module = $delegate->get($alias);
+                    $module = $delegate->get($dependency);
                 } catch (ContainerException $e) {
                     // Catch all delegated exceptions
-                } catch (NotFoundException $e) {
+                } catch (ClassNotFoundException $e) {
                     // Catch all delegated exceptions
                 }
             }
         }
 
         if (null === $module) {
-            throw new NotFoundException($alias);
+            throw new ClassNotFoundException($dependency);
         } else {
             return $module;
         }
@@ -131,92 +87,22 @@ abstract class AbstractContainer implements ContainerInterface
     }
 
     /**
-     * Returns true if the container can return an entry for the given identifier.
-     * Returns false otherwise.
-     *
-     * @param string $alias Identifier of the entry to look for.
-     *
-     * @return boolean
+     * {@inheritdoc}
      */
-    public function has($alias)
+    public function has($dependency)
     {
-        $found = array_key_exists($alias, $this->dependencies)
-            || in_array($alias, $this->aliases);
+        $found = array_key_exists($dependency, $this->dependencies)
+            || in_array($dependency, $this->aliases, true);
 
         if (!$found) {
             foreach ($this->delegates as $delegate) {
-                if ($delegate->has($alias)) {
+                if ($delegate->has($dependency)) {
                     return true;
                 }
             }
         }
 
         return $found;
-    }
-
-    /**
-     * Generate logic conditions and their implementation for container and its delegates.
-     *
-     * @param string     $inputVariable Input condition parameter variable name
-     * @param bool|false $started       Flag if condition branching has been started
-     */
-    public function generateConditions($inputVariable = '$alias', $started = false)
-    {
-        // Iterate all container dependencies
-        foreach ($this->dependencies as $alias => $entity) {
-            // Generate condition statement to define if this class is needed
-            $conditionFunc = !$started ? 'defIfCondition' : 'defElseIfCondition';
-
-            // Create condition branch
-            $condition = $inputVariable . ' === \'' . $alias . '\'';
-            // If we have an alias for this - add it to condition
-            $condition .= array_key_exists($alias, $this->aliases)
-                ? ' || ' . $inputVariable . ' === \'' . $this->aliases[$alias] . '\''
-                : '';
-            // Output condition branch
-            $this->generator->$conditionFunc($condition);
-
-            // Generate condition for each dependency
-            $this->generateCondition($alias, $entity);
-
-            // Set flag that condition is started
-            $started = true;
-        }
-
-        /** @var self $delegate Iterate delegated container to get their conditions */
-        foreach ($this->delegates as $delegate) {
-            // Set current generator
-            if ($delegate instanceof AbstractContainer) {
-                $delegate->generator = $this->generator;
-            }
-            $delegate->generateConditions($inputVariable, $started);
-        }
-    }
-
-    /**
-     * Generate dependency injection logic function.
-     *
-     * @param string $functionName
-     *
-     * @return string PHP logic function code
-     */
-    public function generateFunction($functionName = self::LOGIC_FUNCTION_NAME)
-    {
-        $inputVariable = '$aliasOrClassName';
-        $this->generator
-            ->defFunction($functionName, array($inputVariable))
-            ->defVar('static $services')
-            ->defVar($inputVariable)
-            ->newLine();
-
-        // Generate all container and delegate conditions
-        $this->generateConditions($inputVariable, false);
-
-        // Add method not found
-        return $this->generator
-            ->endIfCondition()
-            ->endFunction()
-            ->flush();
     }
 
     /**
@@ -229,12 +115,4 @@ abstract class AbstractContainer implements ContainerInterface
      * @return self Chaining
      */
     abstract public function set($entity, $alias = null, array $parameters = array());
-
-    /**
-     * Generate container dependency condition code.
-     *
-     * @param string $alias  Entity alias
-     * @param mixed  $entity Entity
-     */
-    abstract protected function generateCondition($alias, &$entity);
 }
