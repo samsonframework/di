@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Created by Vitaly Iegorov <egorov@samsonos.com>.
  * on 22.01.16 at 23:53
@@ -89,7 +89,7 @@ abstract class AbstractContainer implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function has($dependency)
+    public function has($dependency) : bool
     {
         $found = array_key_exists($dependency, $this->dependencies)
             || in_array($dependency, $this->aliases, true);
@@ -108,11 +108,11 @@ abstract class AbstractContainer implements ContainerInterface
     /**
      * Set container dependency.
      *
-     * @param mixed       $entity     Entity
-     * @param string|null $alias      Entity alias for simplier finding
-     * @param array       $parameters Collection of additional parameters
+     * @param mixed       $entity       Entity
+     * @param string|null $alias        Entity alias for simplier finding
+     * @param array       $dependencies Collection of additional parameters
      *
-     * @return self Chaining
+     * @return $this Chaining
      */
-    abstract public function set($entity, $alias = null, array $parameters = array());
+    abstract public function set($entity, string $alias = null, array $dependencies = []) : self;
 }

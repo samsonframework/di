@@ -22,13 +22,13 @@ class ContainerTest extends TestCase
 
     public function testLogicFailed()
     {
-        $this->setExpectedException('\samsonframework\di\exception\ContainerException');
+        $this->expectException(\samsonframework\di\exception\ContainerException::class);
         $this->container->get('doesNotMatter');
     }
 
     public function testLogicFailedGeneration()
     {
-        $this->setExpectedException(ContainerException::class);
+        $this->expectException(ContainerException::class);
         $this->container->set(EmptyTestClass::class, ['failedParam' => new OtherSecondTestClass()]);
 
         $this->createLogic();

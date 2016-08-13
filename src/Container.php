@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Created by Vitaly Iegorov <egorov@samsonos.com>.
  * on 26.01.16 at 15:11
@@ -23,9 +23,9 @@ class Container extends AbstractContainer
      * @param string $alias      Dependency name
      * @param array  $parameters Collection of parameters needed for dependency creation
      *
-     * @return Container Chaining
+     * @return $this Chaining
      */
-    public function service($className, $alias = null, array $parameters = array())
+    public function service($className, string $alias = null, array $parameters = []) : Container
     {
         $this->services[$className] = $className;
 
@@ -33,18 +33,12 @@ class Container extends AbstractContainer
     }
 
     /**
-     * Set dependency.
-     *
-     * @param string $className  Fully qualified class name
-     * @param string $alias      Dependency name
-     * @param array  $parameters Collection of parameters needed for dependency creation
-     *
-     * @return Container Chaining
+     * {@inheritdoc}
      */
-    public function set($className, $alias = null, array $parameters = array())
+    public function set($className, string $alias = null, array $dependencies = []) : Container
     {
         // Merge other class constructor parameters
-        $this->dependencies[$className] = array_merge($this->dependencies[$className], $parameters);
+        $this->dependencies[$className] = array_merge($this->dependencies[$className], $dependencies);
 
         // Store alias for this class name
         $this->aliases[$className] = $alias;
