@@ -7,6 +7,7 @@
  */
 namespace samsonframework\di\tests;
 
+use phpDocumentor\Reflection\DocBlock\Tags\Param;
 use samsonframework\di\Container;
 use samsonframework\di\exception\ClassNotFoundException;
 use samsonframework\di\exception\ContainerException;
@@ -58,50 +59,72 @@ class ContainerTest extends TestCase
         $this->container->delegate($delegate);
 
         static::assertTrue($this->container->has(TestCase::class));
+        static::assertFalse($this->container->has('IDoNotExists'));
     }
 
-//    public function testNestedClassContainer()
-//    {
-//        /** @var TestModuleClass $instance */
-//        $instance = $this->container->get(TestModuleClass::class);
-//
-//        static::assertTrue($instance instanceof TestModuleClass);
-//        static::assertTrue($instance->dependency1 instanceof OtherTestClass);
-//        static::assertTrue($instance->dependency2 instanceof OtherSecondTestClass);
-//        static::assertTrue($instance->dependency1->dependency1 instanceof OtherThirdTestClass);
-//        static::assertEquals([1,2,3], $instance->array);
-//        static::assertEquals('I am string', $instance->string);
-//        static::assertEquals([2,1,2,3], $instance->dependency1->array);
-//        static::assertEquals('I am string2', $instance->dependency1->string);
-//    }
-//
-//    public function testServiceContainer()
-//    {
-//        /** @var TestServiceClass $instance */
-//        $instance = $this->container->get(TestServiceClass::class);
-//
-//        static::assertInstanceOf(TestServiceClass::class, $instance);
-//        static::assertEquals([1,2,3], $instance->array);
-//        static::assertEquals('I am string', $instance->string);
-//
-//        /** @var TestServiceClass $service */
-//        $service = $this->container->get(TestServiceClass::class);
-//
-//        static::assertSame($service, $instance);
-//        static::assertSame($service->dependency1, $instance->dependency1);
-//    }
-//
-//    public function testGetClassNotFoundException()
-//    {
-//        $this->expectException(ClassNotFoundException::class);
-//        $this->container->get('NotExistingClass');
-//    }
-//
-//    public function testHas()
-//    {
-//        static::assertTrue($this->container->has(TestModuleClass::class));
-//        static::assertTrue($this->container->has($this->testServiceAlias));
-//        static::assertTrue($this->container->has(OtherThirdTestClass::class));
-//        static::assertFalse($this->container->has('IDoNotExists'));
-//    }
+    public function dependencyResolver($alias)
+    {
+        if ($alias === TestModuleClass::class) {
+            return new TestModuleClass(
+                new OtherTestClass(
+                    new OtherThirdTestClass(
+                        new OtherSecondTestClass()
+                    ),
+                    [2, 1, 2, 3],
+                    'I am string2'
+                ),
+                new OtherSecondTestClass(),
+                [1, 2, 3],
+                'I am string'
+            );
+        }
+    }
+
+    public function delegateDependencyResolver($alias)
+    {
+        if ($alias === TestCase::class) {
+            return new TestCase();
+        }
+    }
+
+    public function testGet()
+    {
+        $this->setProperty('logicCallable', $this->container, [$this, 'dependencyResolver']);
+
+        /** @var TestModuleClass $instance */
+        $instance = $this->container->get(TestModuleClass::class);
+
+        static::assertTrue($instance instanceof TestModuleClass);
+        static::assertTrue($instance->dependency1 instanceof OtherTestClass);
+        static::assertTrue($instance->dependency2 instanceof OtherSecondTestClass);
+        static::assertTrue($instance->dependency1->dependency1 instanceof OtherThirdTestClass);
+        static::assertEquals([1,2,3], $instance->array);
+        static::assertEquals('I am string', $instance->string);
+        static::assertEquals([2,1,2,3], $instance->dependency1->array);
+        static::assertEquals('I am string2', $instance->dependency1->string);
+    }
+
+    public function testGetWithDelegateExistingDependency()
+    {
+        $delegate = new Container();
+        $delegate->set(TestCase::class);
+        $this->container->delegate($delegate);
+
+        $this->setProperty('logicCallable', $this->container, [$this, 'dependencyResolver']);
+        $this->setProperty('logicCallable', $delegate, [$this, 'delegateDependencyResolver']);
+
+        static::assertInstanceOf(TestCase::class, $this->container->get(TestCase::class));
+        //static::assertFalse($this->container->has('IDoNotExists'));
+    }
+
+    public function testGetWithDelegateNotExistingDependency()
+    {
+        $this->expectException(ClassNotFoundException::class);
+        $delegate = new Container();
+        $delegate->set(TestCase::class);
+        $this->container->delegate($delegate);
+
+        $this->setProperty('logicCallable', $this->container, [$this, 'dependencyResolver']);
+        $this->container->get(TestCase::class);
+    }
 }

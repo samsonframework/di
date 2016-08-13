@@ -36,6 +36,28 @@ class TestCase extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Set $object private/protected property value.
+     *
+     * @param string $property Private/protected property name
+     *
+     * @param object $object   Object instance for getting private/protected property value
+     *
+     * @param mixed  $value Value for property setting
+     *
+     * @return mixed Private/protected property value
+     */
+    protected function setProperty($property, $object, $value)
+    {
+        $property = (new \ReflectionClass($object))->getProperty($property);
+        $property->setAccessible(true);
+        try {
+            return $property->setValue($object, $value);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
      * Set container dependencies
      */
     protected function setContainerDependencies()
