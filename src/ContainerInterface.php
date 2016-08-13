@@ -22,4 +22,16 @@ interface ContainerInterface extends \Interop\Container\ContainerInterface
      * @return ContainerInterface Chaining
      */
     public function set($entity, string $alias = null, array $dependencies = []) : ContainerInterface;
+
+    /**
+     * Set service dependency. Upon first creation of this class instance
+     * it would be used everywhere where this dependency is needed.
+     *
+     * @param string $className  Fully qualified class name
+     * @param string $alias      Dependency name
+     * @param array  $parameters Collection of parameters needed for dependency creation
+     *
+     * @return ContainerInterface Chaining
+     */
+    public function service($className, string $alias = null, array $parameters = []) : ContainerInterface;
 }
