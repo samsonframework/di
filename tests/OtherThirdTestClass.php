@@ -7,7 +7,8 @@ namespace samsonframework\di\tests;
 
 class OtherThirdTestClass
 {
-    protected $dependency1;
+    /** @var OtherSecondTestClass  */
+    public $dependency1;
 
     public function __construct(OtherSecondTestClass $dependency1)
     {

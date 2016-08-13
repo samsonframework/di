@@ -12,11 +12,19 @@ namespace samsonframework\di;
  */
 class ClosureContainer extends AbstractContainer
 {
+    /**
+     * Get line indentation string.
+     *
+     * @param string $line Line string
+     *
+     * @return string Line indentation string
+     */
     protected function getSpaces($line)
     {
         preg_match('/(\s+)[^\s]/', $line, $matches);
         return $matches[1];
     }
+
     /**
      * Generate container dependency condition code.
      * @param string    $alias Entity alias
@@ -66,7 +74,7 @@ class ClosureContainer extends AbstractContainer
      *
      * @return self Chaining
      */
-    public function set($entity, $alias = null, array $parameters = array())
+    public function set($entity, array $parameters, $alias = null)
     {
         // Add unique closure alias
         $this->aliases[$alias] = 'closure' . uniqid(0, 99999);

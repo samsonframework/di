@@ -7,8 +7,11 @@ namespace samsonframework\di\tests;
 
 class TestModuleClass
 {
+    /** @var OtherTestClass  */
     public $dependency1;
+    /** @var OtherSecondTestClass  */
     public $dependency2;
+    
     public $array;
     public $string;
     public $optional;

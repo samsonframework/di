@@ -7,6 +7,7 @@ namespace samsonframework\di\tests;
 
 class OtherTestClass
 {
+    /** @var OtherThirdTestClass  */
     public $dependency1;
     public $array;
     public $string;

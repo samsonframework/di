@@ -7,71 +7,17 @@
  */
 namespace samsonframework\di\tests;
 
-use samsonframework\di\ClosureContainer;
 use samsonframework\di\Container;
+use samsonframework\di\exception\ClassNotFoundException;
+use samsonframework\di\exception\ContainerException;
 use samsonphp\generator\Generator;
 
-require_once 'TestInterface.php';
-require_once 'TestModuleClass.php';
-require_once 'TestServiceClass.php';
-require_once 'OtherTestClass.php';
-require_once 'OtherSecondTestClass.php';
-require_once 'OtherThirdTestClass.php';
-require_once 'OtherInterfaceTestClass.php';
-require_once 'EmptyTestClass.php';
-
-class ContainerTest extends \PHPUnit_Framework_TestCase
+class ContainerTest extends TestCase
 {
-    /** @var Container */
-    protected $container;
-
     public function setUp()
     {
         $this->container = new Container(new Generator());
-        $this->container->set(
-            '\samsonframework\di\tests\OtherTestClass',
-            'otherTestModule',
-            array('arrayParam' => array(0,1,2,3), 'stringParam' => 'I am string2')
-        );
-
-        $this->container->set(
-            '\samsonframework\di\tests\TestModuleClass',
-            'testModule',
-            array('arrayParam' => array(1,2,3), 'stringParam' => 'I am string')
-        );
-
-        $this->container->resolve(
-            '\samsonframework\di\tests\TestInterface',
-            '\samsonframework\di\tests\OtherSecondTestClass'
-        );
-
-        $this->container->set(
-            '\samsonframework\di\tests\OtherInterfaceTestClass',
-            'testImplementsModule',
-            array('arrayParam' => array(1,2,3), 'stringParam' => 'I am string')
-        );
-
-        $this->container->service(
-            '\samsonframework\di\tests\TestServiceClass',
-            'testService',
-            array('arrayParam' => array(1,2,3), 'stringParam' => 'I am string')
-        );
-
-        $closureContainer = new ClosureContainer(new Generator());
-        $closureContainer->set(function() {
-            if (true) {
-                /*just for test*/
-            }
-            return new \samsonframework\di\tests\OtherTestClass(
-                new \samsonframework\di\tests\OtherThirdTestClass(
-                    new \samsonframework\di\tests\OtherSecondTestClass()
-                ),
-                array('1'),
-                '1'
-            );
-        }, 'callbackTest');
-
-        $this->container->delegate($closureContainer);
+        $this->setContainerDependencies();
     }
 
     public function testLogicFailed()
@@ -80,66 +26,69 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->container->get('doesNotMatter');
     }
 
-    public function testLogicGeneration()
+    public function testLogicFailedGeneration()
     {
-        $this->setExpectedException('\samsonframework\di\exception\ConstructorParameterNotSetException');
-        $this->container->set('\samsonframework\di\tests\EmptyTestClass');
+        $this->setExpectedException(ContainerException::class);
+        $this->container->set(EmptyTestClass::class, ['failedParam' => new OtherSecondTestClass()]);
 
-        // Create logic and import it
-        $logic = $this->container->generateFunction();
-        $path = __DIR__.'/ContainerLogic.php';
-        file_put_contents($path, '<?php '.$logic);
-        require_once $path;
+        $this->createLogic();
     }
 
-    public function testFakeClass()
+    public function testNestedClassContainer()
     {
-        // Create logic and import it
-        $logic = $this->container->generateFunction();
-        $path = __DIR__.'/ContainerLogic.php';
-        file_put_contents($path, '<?php '.$logic);
-        require_once $path;
+        $this->createLogic();
 
-        $this->setExpectedException('\samsonframework\di\exception\ClassNotFoundException');
-        $this->container->set('IDoNotExist', 'fake');
+        /** @var TestModuleClass $instance */
+        $instance = $this->container->get(TestModuleClass::class);
 
-        $this->container->get('fake');
+        static::assertTrue($instance instanceof TestModuleClass);
+        static::assertTrue($instance->dependency1 instanceof OtherTestClass);
+        static::assertTrue($instance->dependency2 instanceof OtherSecondTestClass);
+        static::assertTrue($instance->dependency1->dependency1 instanceof OtherThirdTestClass);
+        static::assertEquals([1,2,3], $instance->array);
+        static::assertEquals('I am string', $instance->string);
+        static::assertEquals([2,1,2,3], $instance->dependency1->array);
+        static::assertEquals('I am string2', $instance->dependency1->string);
     }
 
-    public function testGet()
+    public function testServiceContainer()
     {
-        /** @var \samsonframework\di\tests\TestModuleClass $instance */
-        $instance = $this->container->get('\samsonframework\di\tests\TestModuleClass');
+        $this->createLogic('container2');
 
-        $this->assertTrue($instance instanceof \samsonframework\di\tests\TestModuleClass);
-        $this->assertTrue($instance->dependency1 instanceof \samsonframework\di\tests\OtherTestClass);
-        $this->assertTrue($instance->dependency2 instanceof \samsonframework\di\tests\OtherSecondTestClass);
-        $this->assertTrue($instance->dependency1->dependency1 instanceof \samsonframework\di\tests\OtherThirdTestClass);
+        /** @var TestServiceClass $instance */
+        $instance = $this->container->get(TestServiceClass::class);
+        static::assertInstanceOf(TestServiceClass::class, $instance );
+        static::assertEquals([1,2,3], $instance->array);
+        static::assertEquals('I am string', $instance->string);
 
-        /** @var \samsonframework\di\tests\TestServiceClass $service */
-        $service = $this->container->get('\samsonframework\di\tests\TestServiceClass');
-        /** @var \samsonframework\di\tests\TestServiceClass $service2 */
-        $service2 = $this->container->get('\samsonframework\di\tests\TestServiceClass');
+        /** @var TestServiceClass $service */
+        $service = $this->container->get(TestServiceClass::class);
 
-        $this->assertTrue($service instanceof \samsonframework\di\tests\TestServiceClass);
-        $this->assertTrue($service === $service2);
-        $this->assertTrue($service->dependency1 === $service2->dependency1);
+        static::assertSame($service, $instance);
+        static::assertSame($service->dependency1, $instance->dependency1);
+    }
 
-        $this->setExpectedException('\samsonframework\di\exception\NotFoundException');
-        $instance = $this->container->get('IDoNotExists');
+    public function testGetClassNotFoundException()
+    {
+        $this->createLogic('container3');
+
+        $this->expectException(ClassNotFoundException::class);
+        $this->container->get('NotExistingClass');
     }
 
     public function testHas()
     {
-        $this->assertTrue($this->container->has('\samsonframework\di\tests\TestModuleClass'));
-        $this->assertTrue($this->container->has('testModule'));
-        $this->assertTrue($this->container->has('callbackTest'));
-        $this->assertFalse($this->container->has('IDoNotExists'));
+        static::assertTrue($this->container->has(TestModuleClass::class));
+        static::assertTrue($this->container->has($this->testServiceAlias));
+        static::assertTrue($this->container->has(OtherThirdTestClass::class));
+        static::assertFalse($this->container->has('IDoNotExists'));
     }
 
-    public function testClosure()
-    {
-        $closure = $this->container->get('callbackTest');
-        $this->assertTrue($closure instanceof \samsonframework\di\tests\OtherTestClass);
-    }
+
+//
+//    public function testClosure()
+//    {
+//        $closure = $this->container->get('callbackTest');
+//        $this->assertTrue($closure instanceof \samsonframework\di\tests\OtherTestClass);
+//    }
 }

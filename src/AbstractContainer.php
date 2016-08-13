@@ -131,27 +131,92 @@ abstract class AbstractContainer implements ContainerInterface
     }
 
     /**
-     * Define if container has dependency.
+     * Returns true if the container can return an entry for the given identifier.
+     * Returns false otherwise.
      *
-     * @param string $dependency Dependency class name or alias
+     * @param string $alias Identifier of the entry to look for.
      *
-     * @return bool True if container has requested dependency
+     * @return boolean
      */
-    public function has($dependency)
+    public function has($alias)
     {
-        $found = array_key_exists($dependency, $this->dependencies)
-            || in_array($dependency, $this->aliases, true);
+        $found = array_key_exists($alias, $this->dependencies)
+            || in_array($alias, $this->aliases);
 
-        // Delegate searching if not found
         if (!$found) {
             foreach ($this->delegates as $delegate) {
-                if ($delegate->has($dependency)) {
+                if ($delegate->has($alias)) {
                     return true;
                 }
             }
         }
 
         return $found;
+    }
+
+    /**
+     * Generate logic conditions and their implementation for container and its delegates.
+     *
+     * @param string     $inputVariable Input condition parameter variable name
+     * @param bool|false $started       Flag if condition branching has been started
+     */
+    public function generateConditions($inputVariable = '$alias', $started = false)
+    {
+        // Iterate all container dependencies
+        foreach ($this->dependencies as $alias => $entity) {
+            // Generate condition statement to define if this class is needed
+            $conditionFunc = !$started ? 'defIfCondition' : 'defElseIfCondition';
+
+            // Create condition branch
+            $condition = $inputVariable . ' === \'' . $alias . '\'';
+            // If we have an alias for this - add it to condition
+            $condition .= array_key_exists($alias, $this->aliases)
+                ? ' || ' . $inputVariable . ' === \'' . $this->aliases[$alias] . '\''
+                : '';
+            // Output condition branch
+            $this->generator->$conditionFunc($condition);
+
+            // Generate condition for each dependency
+            $this->generateCondition($alias, $entity);
+
+            // Set flag that condition is started
+            $started = true;
+        }
+
+        /** @var self $delegate Iterate delegated container to get their conditions */
+        foreach ($this->delegates as $delegate) {
+            // Set current generator
+            if ($delegate instanceof AbstractContainer) {
+                $delegate->generator = $this->generator;
+            }
+            $delegate->generateConditions($inputVariable, $started);
+        }
+    }
+
+    /**
+     * Generate dependency injection logic function.
+     *
+     * @param string $functionName
+     *
+     * @return string PHP logic function code
+     */
+    public function generateFunction($functionName = self::LOGIC_FUNCTION_NAME)
+    {
+        $inputVariable = '$aliasOrClassName';
+        $this->generator
+            ->defFunction($functionName, array($inputVariable))
+            ->defVar('static $services')
+            ->defVar($inputVariable)
+            ->newLine();
+
+        // Generate all container and delegate conditions
+        $this->generateConditions($inputVariable, false);
+
+        // Add method not found
+        return $this->generator
+            ->endIfCondition()
+            ->endFunction()
+            ->flush();
     }
 
     /**
@@ -164,4 +229,12 @@ abstract class AbstractContainer implements ContainerInterface
      * @return self Chaining
      */
     abstract public function set($entity, $alias = null, array $parameters = array());
+
+    /**
+     * Generate container dependency condition code.
+     *
+     * @param string $alias  Entity alias
+     * @param mixed  $entity Entity
+     */
+    abstract protected function generateCondition($alias, &$entity);
 }
