@@ -51,6 +51,15 @@ class ContainerTest extends TestCase
         static::assertFalse($this->container->has('IDoNotExists'));
     }
 
+    public function testHasWithDelegate()
+    {
+        $delegate = new Container();
+        $delegate->set(TestCase::class);
+        $this->container->delegate($delegate);
+
+        static::assertTrue($this->container->has(TestCase::class));
+    }
+
 //    public function testNestedClassContainer()
 //    {
 //        /** @var TestModuleClass $instance */
