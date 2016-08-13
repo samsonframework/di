@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Created by PhpStorm.
  * User: VITALYIEGOROV
@@ -22,73 +22,69 @@ class ContainerTest extends TestCase
 
     public function testLogicFailed()
     {
-        $this->expectException(\samsonframework\di\exception\ContainerException::class);
+        $this->expectException(ContainerException::class);
         $this->container->get('doesNotMatter');
     }
 
-    public function testLogicFailedGeneration()
+    public function testSetWithoutAlias()
     {
-        $this->expectException(ContainerException::class);
-        $this->container->set(EmptyTestClass::class, ['failedParam' => new OtherSecondTestClass()]);
+        $this->container->set(TestModuleClass::class, ['dependency1' => OtherTestClass::class]);
 
-        $this->createLogic();
+        static::assertArrayHasKey(TestModuleClass::class, $this->getProperty('dependencies', $this->container));
+        static::assertArrayHasKey('dependency1', $this->getProperty('dependencies', $this->container)[TestModuleClass::class]);
     }
 
-    public function testNestedClassContainer()
+    public function testSetWithAlias()
     {
-        $this->createLogic();
+        $alias = 'testAlias';
+        $this->container->set(TestModuleClass::class, ['dependency1' => OtherTestClass::class], $alias);
 
-        /** @var TestModuleClass $instance */
-        $instance = $this->container->get(TestModuleClass::class);
-
-        static::assertTrue($instance instanceof TestModuleClass);
-        static::assertTrue($instance->dependency1 instanceof OtherTestClass);
-        static::assertTrue($instance->dependency2 instanceof OtherSecondTestClass);
-        static::assertTrue($instance->dependency1->dependency1 instanceof OtherThirdTestClass);
-        static::assertEquals([1,2,3], $instance->array);
-        static::assertEquals('I am string', $instance->string);
-        static::assertEquals([2,1,2,3], $instance->dependency1->array);
-        static::assertEquals('I am string2', $instance->dependency1->string);
+        static::assertArrayHasKey(TestModuleClass::class, $this->getProperty('aliases', $this->container));
+        static::assertEquals($alias, $this->getProperty('aliases', $this->container)[TestModuleClass::class]);
     }
 
-    public function testServiceContainer()
-    {
-        $this->createLogic('container2');
-
-        /** @var TestServiceClass $instance */
-        $instance = $this->container->get(TestServiceClass::class);
-        static::assertInstanceOf(TestServiceClass::class, $instance );
-        static::assertEquals([1,2,3], $instance->array);
-        static::assertEquals('I am string', $instance->string);
-
-        /** @var TestServiceClass $service */
-        $service = $this->container->get(TestServiceClass::class);
-
-        static::assertSame($service, $instance);
-        static::assertSame($service->dependency1, $instance->dependency1);
-    }
-
-    public function testGetClassNotFoundException()
-    {
-        $this->createLogic('container3');
-
-        $this->expectException(ClassNotFoundException::class);
-        $this->container->get('NotExistingClass');
-    }
-
-    public function testHas()
-    {
-        static::assertTrue($this->container->has(TestModuleClass::class));
-        static::assertTrue($this->container->has($this->testServiceAlias));
-        static::assertTrue($this->container->has(OtherThirdTestClass::class));
-        static::assertFalse($this->container->has('IDoNotExists'));
-    }
-
-
-//
-//    public function testClosure()
+//    public function testNestedClassContainer()
 //    {
-//        $closure = $this->container->get('callbackTest');
-//        $this->assertTrue($closure instanceof \samsonframework\di\tests\OtherTestClass);
+//        /** @var TestModuleClass $instance */
+//        $instance = $this->container->get(TestModuleClass::class);
+//
+//        static::assertTrue($instance instanceof TestModuleClass);
+//        static::assertTrue($instance->dependency1 instanceof OtherTestClass);
+//        static::assertTrue($instance->dependency2 instanceof OtherSecondTestClass);
+//        static::assertTrue($instance->dependency1->dependency1 instanceof OtherThirdTestClass);
+//        static::assertEquals([1,2,3], $instance->array);
+//        static::assertEquals('I am string', $instance->string);
+//        static::assertEquals([2,1,2,3], $instance->dependency1->array);
+//        static::assertEquals('I am string2', $instance->dependency1->string);
+//    }
+//
+//    public function testServiceContainer()
+//    {
+//        /** @var TestServiceClass $instance */
+//        $instance = $this->container->get(TestServiceClass::class);
+//
+//        static::assertInstanceOf(TestServiceClass::class, $instance);
+//        static::assertEquals([1,2,3], $instance->array);
+//        static::assertEquals('I am string', $instance->string);
+//
+//        /** @var TestServiceClass $service */
+//        $service = $this->container->get(TestServiceClass::class);
+//
+//        static::assertSame($service, $instance);
+//        static::assertSame($service->dependency1, $instance->dependency1);
+//    }
+//
+//    public function testGetClassNotFoundException()
+//    {
+//        $this->expectException(ClassNotFoundException::class);
+//        $this->container->get('NotExistingClass');
+//    }
+//
+//    public function testHas()
+//    {
+//        static::assertTrue($this->container->has(TestModuleClass::class));
+//        static::assertTrue($this->container->has($this->testServiceAlias));
+//        static::assertTrue($this->container->has(OtherThirdTestClass::class));
+//        static::assertFalse($this->container->has('IDoNotExists'));
 //    }
 }

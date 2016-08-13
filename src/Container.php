@@ -15,16 +15,16 @@ use samsonframework\di\exception\ContainerException;
 class Container implements ContainerInterface
 {
     /** @var array[string] Collection of loaded services */
-    protected $services = array();
+    protected $services = [];
 
     /** @var array[string] Collection of alias => class name for alias resolving */
-    protected $aliases = array();
+    protected $aliases = [];
 
     /** @var array[string] Collection of class name dependencies trees */
-    protected $dependencies = array();
+    protected $dependencies = [];
 
     /** @var ContainerInterface[] Collection of delegated containers */
-    protected $delegates = array();
+    protected $delegates = [];
 
     /** @var callable Dependency resolving function callable */
     protected $logicCallable;
@@ -40,8 +40,8 @@ class Container implements ContainerInterface
      */
     protected function logic($dependency)
     {
-        if (!function_exists($this->logicCallable)) {
-            throw new ContainerException('Logic function does not exists');
+        if (!is_callable($this->logicCallable)) {
+            throw new ContainerException('Logic function is not callable');
         }
 
         return call_user_func($this->logicCallable, $dependency);
@@ -49,6 +49,8 @@ class Container implements ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \samsonframework\di\exception\ContainerException
      */
     public function get($dependency)
     {
@@ -111,27 +113,34 @@ class Container implements ContainerInterface
      * it would be used everywhere where this dependency is needed.
      *
      * @param string $className  Fully qualified class name
-     * @param string $alias      Dependency name
      * @param array  $parameters Collection of parameters needed for dependency creation
+     * @param string $alias      Dependency name
      *
      * @return ContainerInterface Chaining
      */
-    public function service($className, string $alias = null, array $parameters = []) : ContainerInterface
+    public function service($className, array $parameters = [], string $alias = null) : ContainerInterface
     {
         $this->services[$className] = $className;
 
-        return $this->set($className, $alias, $parameters);
+        return $this->set($className, $parameters, $alias);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function set($className, string $alias = null, array $dependencies = []) : ContainerInterface
+    public function set($className, array $dependencies = [], string $alias = null) : ContainerInterface
     {
+        // Create dependencies collection for class name
+        if (!array_key_exists($className, $this->dependencies)) {
+            $this->dependencies[$className] = [];
+        }
+        
         // Merge other class constructor parameters
         $this->dependencies[$className] = array_merge($this->dependencies[$className], $dependencies);
 
         // Store alias for this class name
         $this->aliases[$className] = $alias;
+
+        return $this;
     }
 }

@@ -16,18 +16,23 @@ class TestCase extends \PHPUnit\Framework\TestCase
     protected $testServiceAlias = 'test_service';
 
     /**
-     * Create container logic executable.
+     * Get $object private/protected property value.
      *
-     * @param string $function Logic function name
+     * @param string $property Private/protected property name
+     *
+     * @param object $object   Object instance for getting private/protected property value
+     *
+     * @return mixed Private/protected property value
      */
-    protected function createLogic($function = 'container')
+    protected function getProperty($property, $object)
     {
-        // Create logic and import it
-        $logic = $this->container->build($function);
-        $path = __DIR__.'/ContainerLogic.php';
-        @unlink($path);
-        file_put_contents($path, '<?php '.$logic);
-        require $path;
+        $property = (new \ReflectionClass($object))->getProperty($property);
+        $property->setAccessible(true);
+        try {
+            return $property->getValue($object);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     /**
