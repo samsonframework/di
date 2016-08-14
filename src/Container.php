@@ -29,7 +29,6 @@ class Container implements ContainerInterface
     /** @var callable Dependency resolving function callable */
     protected $logicCallable;
 
-
     /**
      * Wrapper for calling dependency resolving function.
      *
@@ -51,30 +50,43 @@ class Container implements ContainerInterface
      * {@inheritdoc}
      *
      * @throws \samsonframework\di\exception\ContainerException
+     * @throws \samsonframework\di\exception\ClassNotFoundException
      */
     public function get($dependency)
     {
         // Get pointer from logic
-        $module = $this->logic($dependency);
-
-        // Try delegate lookup
-        if (null === $module) {
-            foreach ($this->delegates as $delegate) {
-                try {
-                    $module = $delegate->get($dependency);
-                } catch (ContainerException $e) {
-                    // Catch all delegated exceptions
-                } catch (ClassNotFoundException $e) {
-                    // Catch all delegated exceptions
-                }
-            }
-        }
+        $module = $this->logic($dependency) ?? $this->getFromDelegate($dependency);
 
         if (null === $module) {
             throw new ClassNotFoundException($dependency);
         } else {
             return $module;
         }
+    }
+
+    /**
+     * Try to find dependency in delegate container.
+     *
+     * @param string $dependency Dependency identifier
+     *
+     * @return mixed Delegate found dependency
+     *
+     * @throws \Interop\Container\Exception\ContainerException
+     */
+    protected function getFromDelegate(string $dependency)
+    {
+        // Try delegate lookup
+        foreach ($this->delegates as $delegate) {
+            try {
+                return $delegate->get($dependency);
+            } catch (ContainerException $e) {
+                // Catch all delegated exceptions
+            } catch (ClassNotFoundException $e) {
+                // Catch all delegated exceptions
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -97,15 +109,26 @@ class Container implements ContainerInterface
         $found = array_key_exists($dependency, $this->dependencies)
             || in_array($dependency, $this->aliases, true);
 
-        if (!$found) {
-            foreach ($this->delegates as $delegate) {
-                if ($delegate->has($dependency)) {
-                    return true;
-                }
+        // Return true if found or try delegate containers
+        return $found ?: $this->hasDelegate($dependency);
+    }
+
+    /**
+     * Define if delegate containers have dependency.
+     *
+     * @param string $dependency Dependency identifier
+     *
+     * @return bool True if delegate containers have dependency
+     */
+    protected function hasDelegate(string $dependency) : bool
+    {
+        foreach ($this->delegates as $delegate) {
+            if ($delegate->has($dependency)) {
+                return true;
             }
         }
 
-        return $found;
+        return false;
     }
 
     /**
