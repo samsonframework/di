@@ -77,6 +77,10 @@ class ContainerTest extends TestCase
                 [1, 2, 3],
                 'I am string'
             );
+        } elseif ($alias === 'testService') {
+            $service = new OtherSecondTestClass();
+            $this->setProperty('serviceInstances', $this->container, ['testService' => $service]);
+            return $service;
         }
     }
 
@@ -126,5 +130,16 @@ class ContainerTest extends TestCase
 
         $this->setProperty('logicCallable', $this->container, [$this, 'dependencyResolver']);
         $this->container->get(TestCase::class);
+    }
+
+    public function testGetServices()
+    {
+        $serviceName = 'testService';
+        $this->container->service(OtherSecondTestClass::class, [], $serviceName);
+        $this->setProperty('logicCallable', $this->container, [$this, 'dependencyResolver']);
+
+        $serviceInstance = $this->container->get($serviceName);
+        static::assertInstanceOf(OtherSecondTestClass::class, $serviceInstance);
+        static::assertArrayHasKey($serviceName, $this->container->getServices());
     }
 }

@@ -4,6 +4,8 @@
  * on 26.01.16 at 15:11
  */
 namespace samsonframework\di;
+
+use samsonframework\container\ContainerInterface;
 use samsonframework\di\exception\ClassNotFoundException;
 use samsonframework\di\exception\ContainerException;
 
@@ -14,6 +16,9 @@ use samsonframework\di\exception\ContainerException;
  */
 class Container implements ContainerInterface
 {
+    /** @var array Collection of instantiated service instances */
+    protected $serviceInstances = [];
+
     /** @var array[string] Collection of loaded services */
     protected $services = [];
 
@@ -165,5 +170,13 @@ class Container implements ContainerInterface
         $this->aliases[$className] = $alias;
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getServices() : array
+    {
+        return $this->serviceInstances;
     }
 }
