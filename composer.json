@@ -13,8 +13,7 @@
   ],
   "require": {
     "php": "^7.0",
-    "samsonphp/generator": "*",
-    "container-interop/container-interop": "^1.1"
+    "samsonframework/base": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "5.*"
