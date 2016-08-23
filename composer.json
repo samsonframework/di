@@ -30,6 +30,11 @@
       "samsonframework\\di\\tests\\": "tests/"
     }
   },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "2.x-dev"
+    }
+  },
   "config":{
     "github-protocols":["https"]
   }
