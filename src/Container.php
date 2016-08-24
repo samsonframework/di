@@ -34,6 +34,9 @@ class Container implements ContainerInterface
     /** @var callable Dependency resolving function callable */
     protected $logicCallable;
 
+    /** @var array Collection of scope => [alias => class_name] */
+    protected $scopes = [];
+
     /**
      * Wrapper for calling dependency resolving function.
      *
@@ -178,10 +181,10 @@ class Container implements ContainerInterface
     public function getServices(string $filterScope = null) : array
     {
         $filtered = [];
-        if ($filterScope !== null) {
-            foreach ($this->serviceInstances as $key => $instance) {
-                if (in_array($filterScope, $instance->scopes, true)) {
-                    $filtered[$key] = $instance;
+        if ($filterScope !== null && array_key_exists($filterScope, $this->scopes)) {
+            foreach ($this->scopes[$filterScope] as $alias => $className) {
+                if (array_key_exists($alias, $this->serviceInstances)) {
+                    $filtered[$alias] = $this->serviceInstances[$alias];
                 }
             }
             return $filtered;
