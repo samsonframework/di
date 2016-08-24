@@ -175,8 +175,18 @@ class Container implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function getServices() : array
+    public function getServices(string $filterScope = null) : array
     {
-        return $this->serviceInstances;
+        $filtered = [];
+        if ($filterScope !== null) {
+            foreach ($this->serviceInstances as $key => $instance) {
+                if (in_array($filterScope, $instance->scopes, true)) {
+                    $filtered[$key] = $instance;
+                }
+            }
+            return $filtered;
+        } else {
+            return $this->serviceInstances;
+        }
     }
 }
