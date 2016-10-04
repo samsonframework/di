@@ -4,7 +4,6 @@
  * on 26.01.16 at 15:11
  */
 namespace samsonframework\di;
-
 use samsonframework\container\ContainerInterface;
 use samsonframework\di\exception\ClassNotFoundException;
 use samsonframework\di\exception\ContainerException;
@@ -18,25 +17,18 @@ class Container implements ContainerInterface
 {
     /** @var array Collection of instantiated service instances */
     protected $serviceInstances = [];
-
     /** @var array[string] Collection of loaded services */
     protected $services = [];
-
     /** @var array[string] Collection of alias => class name for alias resolving */
     protected $aliases = [];
-
     /** @var array[string] Collection of class name dependencies trees */
     protected $dependencies = [];
-
     /** @var ContainerInterface[] Collection of delegated containers */
     protected $delegates = [];
-
     /** @var callable Dependency resolving function callable */
     protected $logicCallable;
-
     /** @var array Collection of scope => [alias => class_name] */
     protected $scopes = [];
-
     /**
      * Wrapper for calling dependency resolving function.
      *
@@ -50,8 +42,17 @@ class Container implements ContainerInterface
         if (!is_callable($this->logicCallable)) {
             throw new ContainerException('Logic function is not callable');
         }
-
         return call_user_func($this->logicCallable, $dependency);
+    }
+
+    /**
+     * Get parameter
+     *
+     * @param $name
+     */
+    public function getParameter($name)
+    {
+        return $this->parameter($name);
     }
 
     /**
@@ -64,14 +65,12 @@ class Container implements ContainerInterface
     {
         // Get pointer from logic
         $module = $this->logic($dependency) ?? $this->getFromDelegate($dependency);
-
         if (null === $module) {
             throw new ClassNotFoundException($dependency);
         } else {
             return $module;
         }
     }
-
     /**
      * Try to find dependency in delegate container.
      *
@@ -93,10 +92,8 @@ class Container implements ContainerInterface
                 // Catch all delegated exceptions
             }
         }
-
         return null;
     }
-
     /**
      * Implementing delegate lookup feature.
      * If current container cannot resolve entity dependency
@@ -108,7 +105,6 @@ class Container implements ContainerInterface
     {
         $this->delegates[] = $container;
     }
-
     /**
      * {@inheritdoc}
      */
@@ -116,11 +112,9 @@ class Container implements ContainerInterface
     {
         $found = array_key_exists($dependency, $this->dependencies)
             || in_array($dependency, $this->aliases, true);
-
         // Return true if found or try delegate containers
         return $found ?: $this->hasDelegate($dependency);
     }
-
     /**
      * Define if delegate containers have dependency.
      *
@@ -135,10 +129,8 @@ class Container implements ContainerInterface
                 return true;
             }
         }
-
         return false;
     }
-
     /**
      * Set service dependency. Upon first creation of this class instance
      * it would be used everywhere where this dependency is needed.
@@ -152,10 +144,8 @@ class Container implements ContainerInterface
     public function service($className, array $parameters = [], string $alias = null) : ContainerInterface
     {
         $this->services[$className] = $className;
-
         return $this->set($className, $parameters, $alias);
     }
-
     /**
      * {@inheritdoc}
      */
@@ -165,16 +155,13 @@ class Container implements ContainerInterface
         if (!array_key_exists($className, $this->dependencies)) {
             $this->dependencies[$className] = [];
         }
-        
+
         // Merge other class constructor parameters
         $this->dependencies[$className] = array_merge($this->dependencies[$className], $dependencies);
-
         // Store alias for this class name
         $this->aliases[$className] = $alias;
-
         return $this;
     }
-
     /**
      * {@inheritdoc}
      */
@@ -183,13 +170,9 @@ class Container implements ContainerInterface
         $filtered = [];
         if ($filterScope !== null && array_key_exists($filterScope, $this->scopes)) {
             foreach ($this->scopes[$filterScope] as $alias => $className) {
-                if (array_key_exists($alias, $this->serviceInstances)) {
-                    $filtered[$alias] = $this->serviceInstances[$alias];
-                }
+                $filtered[] = $this->get($className);
             }
-            return $filtered;
-        } else {
-            return $this->serviceInstances;
         }
+        return $filtered;
     }
 }
